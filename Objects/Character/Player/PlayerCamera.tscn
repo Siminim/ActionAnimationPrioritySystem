@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://d4d8ffr6o86r4"]
+
+[ext_resource type="Script" uid="uid://bwavt401ftayy" path="res://Scripts/Objects/Character/Player/PlayerCamera.cs" id="1_ydxyc"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ydxyc"]
+radius = 0.33
+
+[node name="PlayerCamera" type="Node3D"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+script = ExtResource("1_ydxyc")
+
+[node name="SpringArmPivot" type="Node3D" parent="."]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="SpringArmPivot"]
+shape = SubResource("SphereShape3D_ydxyc")
+spring_length = 2.5
+
+[node name="CameraTarget" type="Node3D" parent="SpringArmPivot/SpringArm3D"]
+
+[node name="Camera3D" type="Camera3D" parent="SpringArmPivot"]

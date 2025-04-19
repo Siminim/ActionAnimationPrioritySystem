@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://b5lnbyhljycvh"]
+
+[ext_resource type="PackedScene" uid="uid://ct821k33yjuwb" path="res://Objects/Character/Player/Player.tscn" id="1_u3tya"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2wqeq"]
+albedo_color = Color(0.43196, 0.481779, 0.307779, 1)
+
+[node name="World" type="Node3D"]
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, -2, 0)
+shadow_enabled = true
+directional_shadow_fade_start = 0.7
+directional_shadow_max_distance = 60.0
+
+[node name="Objects" type="Node3D" parent="."]
+
+[node name="Ground" type="CSGBox3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+use_collision = true
+size = Vector3(64, 0.5, 64)
+material = SubResource("StandardMaterial3D_2wqeq")
+
+[node name="Player" parent="." instance=ExtResource("1_u3tya")]
