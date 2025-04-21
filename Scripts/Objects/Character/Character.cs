@@ -7,8 +7,8 @@ public partial class Character : CharacterBody3D
     // ---------------------------------- Delegates -------------------------------------
     // ---------------------------------------------------------------------------------- 
 
-    public Delegates.CharacterStateParameterDelegate OnUpdateMoveState;
-    public Delegates.CharacterStateParameterDelegate OnUpdateUpperBodyState;
+    public Delegates.CharacterMoveStateParameterDelegate OnUpdateMoveState;
+    public Delegates.CharacterUpperBodyStateParameterDelegate OnUpdateUpperBodyState;
 
     // ----------------------------------------------------------------------------------
     // ----------------------------------- Visuals --------------------------------------
@@ -21,7 +21,15 @@ public partial class Character : CharacterBody3D
     // ------------------------------ State Conditions ----------------------------------
     // ---------------------------------------------------------------------------------- 
 
-    public CharacterState moveState = CharacterState.Idle;
+    public CharacterLocomotionState moveState = CharacterLocomotionState.Idle;
+    public CharacterUpperBodyState upperBodyState = CharacterUpperBodyState.None;
+
+    // ----------------------------------------------------------------------------------
+    // ------------------------------ Combat Variables ----------------------------------
+    // ---------------------------------------------------------------------------------- 
+
+    protected bool weaponsReady = false;
+    protected bool blockEnabled = false;
 
     // ----------------------------------------------------------------------------------
     // ----------------------------- Movement Variables ---------------------------------
@@ -102,7 +110,8 @@ public partial class Character : CharacterBody3D
 
         MoveAndSlide();
 
-        UpdateState();
+        UpdateMoveState();
+        UpdateUpperBodyState();
         //animator.Update(delta);
     }
 
@@ -212,13 +221,23 @@ public partial class Character : CharacterBody3D
         Velocity += GetGravity().Normalized() * velocityMod * jumpDecay;
     }
 
+    protected void InvertWeaponReadyState()
+    {
+        weaponsReady = !weaponsReady;
+    }
+
+    protected void SetBlockState(bool state)
+    {
+        blockEnabled = state;
+    }
+
     // ----------------------------------------------------------------------------------
-    // ---------------------------- States and Conditions -------------------------------
+    // -------------------------- Move State and Conditions -----------------------------
     // ---------------------------------------------------------------------------------- 
 
-    private void UpdateState()
+    private void UpdateMoveState()
     {
-        CharacterState newState = CharacterState.None;
+        CharacterLocomotionState newState = CharacterLocomotionState.None;
     
         newState = AirStateUpdate();
         
@@ -228,7 +247,7 @@ public partial class Character : CharacterBody3D
         OnUpdateMoveState(newState);
     }
 
-    private CharacterState AirStateUpdate()
+    private CharacterLocomotionState AirStateUpdate()
     {
         bool moving = Velocity.X != 0 || Velocity.Z != 0;
 
@@ -237,13 +256,13 @@ public partial class Character : CharacterBody3D
             onGround = false;
 
             if (moving && Velocity.Y > 0.0f)
-                return CharacterState.Run_Jump_Start;
+                return CharacterLocomotionState.Run_Jump_Start;
             else if (moving)
-                return CharacterState.Run_Air;
+                return CharacterLocomotionState.Run_Air;
             else if (Velocity.Y > 0.0f)
-                return CharacterState.Idle_Jump_Start;
+                return CharacterLocomotionState.Idle_Jump_Start;
             else
-                return CharacterState.Idle_Air;
+                return CharacterLocomotionState.Idle_Air;
         }
         else if (IsOnFloor() && !onGround)
         {
@@ -251,10 +270,10 @@ public partial class Character : CharacterBody3D
             onGround = true;
         }
 
-        return CharacterState.None;
+        return CharacterLocomotionState.None;
     }
 
-    private CharacterState GroundStateUpdate()
+    private CharacterLocomotionState GroundStateUpdate()
     {
         bool moving = Velocity.X != 0 || Velocity.Z != 0;
 
@@ -266,32 +285,58 @@ public partial class Character : CharacterBody3D
                 return GroundMovingStateUpdate();
         }
 
-        return CharacterState.None;
+        return CharacterLocomotionState.None;
     }
 
-    private CharacterState GroundIdleStateUpdate()
+    private CharacterLocomotionState GroundIdleStateUpdate()
     {
         if (crouchEnabled)
-            return CharacterState.Idle_Crouch;
+            return CharacterLocomotionState.Idle_Crouch;
         else
-            return CharacterState.Idle;
+            return CharacterLocomotionState.Idle;
     }
 
-    private CharacterState GroundMovingStateUpdate()
+    private CharacterLocomotionState GroundMovingStateUpdate()
     {
         if (!sprintEnabled && !crouchEnabled)
-            return CharacterState.WalkRun;
+            return CharacterLocomotionState.WalkRun;
         else if (sprintEnabled)
-            return CharacterState.Sprint;
+            return CharacterLocomotionState.Sprint;
         else if (crouchEnabled)
-            return CharacterState.Walk_Crouch;
+            return CharacterLocomotionState.Walk_Crouch;
 
-        return CharacterState.None;
+        return CharacterLocomotionState.None;
+    }
+
+    // ----------------------------------------------------------------------------------
+    // ----------------------- Upper Body State and Conditions --------------------------
+    // ---------------------------------------------------------------------------------- 
+
+    private void UpdateUpperBodyState()
+    {
+        CharacterUpperBodyState newState = CharacterUpperBodyState.None;
+
+        if (!weaponsReady)
+            newState = CharacterUpperBodyState.None;
+        else if (!IsOnFloor() || sprintEnabled)
+            newState = CharacterUpperBodyState.WeaponsReady;
+        else
+            newState = UpperBodyStateUpdate();
+
+        OnUpdateUpperBodyState(newState);
+    }
+
+    private CharacterUpperBodyState UpperBodyStateUpdate()
+    {
+        if (blockEnabled)
+            return CharacterUpperBodyState.Blocking;
+
+        return CharacterUpperBodyState.WeaponsReady;
     }
 
 }
 
-public enum CharacterState
+public enum CharacterLocomotionState
 {
     // ----------------------------------------------------------------------------------
     // ------------------------------- Movement States ----------------------------------
@@ -310,7 +355,13 @@ public enum CharacterState
     Run_Air,
 
     Idle_Crouch,
-    Walk_Crouch,
+    Walk_Crouch
+}
 
-    Dodge_Roll
+public enum CharacterUpperBodyState
+{
+    None,
+
+    WeaponsReady,
+    Blocking
 }

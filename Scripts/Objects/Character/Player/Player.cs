@@ -33,6 +33,8 @@ public partial class Player : Character
         WalkInput();
         MovementInput();
         JumpInput();
+        ReadyWeaponInput();
+        BlockInput();
 
         AnimateHead(playerCamera.Basis, playerCamera.SpringArmBasis);
 
@@ -85,5 +87,20 @@ public partial class Player : Character
         
         if (Input.IsActionJustReleased("Jump"))
             EndJumpEarly();
+    }
+
+    public void ReadyWeaponInput()
+    {
+        if (Input.IsActionJustPressed("ReadyWeapon"))
+            InvertWeaponReadyState();
+    }
+
+    public void BlockInput()
+    {
+        if (Input.IsActionJustPressed("Block"))
+            SetBlockState(true);
+
+        if (Input.IsActionJustReleased("Block"))
+            SetBlockState(false);
     }
 }

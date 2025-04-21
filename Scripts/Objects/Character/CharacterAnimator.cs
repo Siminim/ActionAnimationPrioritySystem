@@ -55,67 +55,63 @@ public partial class CharacterAnimator
 
         character.OnUpdateMoveState += UpdateMoveState;
         character.OnUpdateUpperBodyState += UpdateUpperBodyState;
+
     }
 
     // ----------------------------------------------------------------------------------
     // ----------------------------- Determine States -----------------------------------
     // ---------------------------------------------------------------------------------- 
 
-    private void UpdateMoveState(CharacterState state)
+    private void UpdateMoveState(CharacterLocomotionState state)
     {
         switch (state)
         {
-            case CharacterState.Idle:
+            case CharacterLocomotionState.Idle:
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("Idle");
                 break;
 
-            case CharacterState.Idle_Crouch:
+            case CharacterLocomotionState.Idle_Crouch:
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("Idle_Crouch");
                 break;
 
-            case CharacterState.Idle_Jump_Start:
+            case CharacterLocomotionState.Idle_Jump_Start:
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("Idle_Jump");
                 break;
 
-            case CharacterState.Run_Jump_Start:
+            case CharacterLocomotionState.Run_Jump_Start:
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("Run_Jump");
                 break;
 
-            case CharacterState.Idle_Air:
+            case CharacterLocomotionState.Idle_Air:
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("Idle_Air");
                 break;
 
-            case CharacterState.Run_Air:
+            case CharacterLocomotionState.Run_Air:
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("Run_Air");
                 break;
 
-            case CharacterState.WalkRun:
+            case CharacterLocomotionState.WalkRun:
                 UpdateWalkRunAnim(deltaTime);
                 TurnToMoveDirection(deltaTime);
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("WalkRun");
                 break;
 
-            case CharacterState.Sprint:
+            case CharacterLocomotionState.Sprint:
                 TurnToMoveDirection(deltaTime);
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("Sprint");
                 break;
 
-            case CharacterState.Walk_Crouch:
+            case CharacterLocomotionState.Walk_Crouch:
                 if (state != character.moveState)
                     animLocomotionStateMachine.Travel("Walk_Crouch");
-                break;
-
-            case CharacterState.Dodge_Roll:
-                if (state != character.moveState)
-                    animLocomotionStateMachine.Travel("Dodge_Roll");
                 break;
 
             default:
@@ -124,22 +120,30 @@ public partial class CharacterAnimator
         character.moveState = state;
     }
 
-    private void UpdateUpperBodyState(CharacterState state)
+    private void UpdateUpperBodyState(CharacterUpperBodyState state)
     {
-        // switch (state)
-        // {
-        //     case CharacterState.Arms_Down:
-        //         SetUpperBodyBlendValue(0.0f);
-        //         break;
-            
-        //     case CharacterState.Arms_Up:
-        //         SetUpperBodyBlendValue(1.0f);
-        //         break;
+        if (state == CharacterUpperBodyState.None)
+            SetUpperBodyBlendValue(0.0f);
+        else
+            SetUpperBodyBlendValue(1.0f);
 
-        //     default:
-        //         break;
-        // }
-        // character.actionState = state;
+        switch (state)
+        {
+            case CharacterUpperBodyState.None:
+                break;
+            
+            case CharacterUpperBodyState.WeaponsReady:
+                if (state != character.upperBodyState)
+                    WeaponReadyState();
+                break;
+
+            case CharacterUpperBodyState.Blocking:
+                if (state != character.upperBodyState)
+                    BlockingState();
+                break;
+        }
+
+        character.upperBodyState = state;
     }
 
     // ----------------------------------------------------------------------------------
@@ -181,7 +185,8 @@ public partial class CharacterAnimator
 
         upperBodyBlendValue = Mathf.Lerp(upperBodyBlendValue, value, (float)deltaTime * upperBodyBlendTransitionSpeed);
 
-        animationTree.Set("parameters/UpperBody_StateMachine/blend_amount", upperBodyBlendTransitionSpeed);
+        // DEBUG: Not using the lerped value
+        animationTree.Set("parameters/UpperLower_Blend/blend_amount", value);
     }
 
     public void SetLookingDirection(Basis basisX, Basis basisY)
@@ -197,5 +202,21 @@ public partial class CharacterAnimator
         headTurn = headTurn.Lerp(new Vector2(wrappedX, y), (float)deltaTime * headTurnTransitionSpeed);
 
         animationTree.Set("parameters/HeadTurn/blend_position", headTurn);
+    }
+
+    public void WeaponReadyState()
+    {
+        // TODO: Should determine which weapon ready animation based on the weapon
+        
+        // if (character.weapon == fist)
+        animUpperBodyStateMachine.Travel("Fists_Ready");
+    }
+
+    public void BlockingState()
+    {
+        // TODO: Should determine which blocking animation based on the weapon
+        
+        // if (character.weapon == fist)
+        animUpperBodyStateMachine.Travel("Fists_Blocking");
     }
 }

@@ -11,7 +11,8 @@ public static class Delegates
 
     // parameters
 
-    public delegate void CharacterStateParameterDelegate(CharacterState characterState);
+    public delegate void CharacterMoveStateParameterDelegate(CharacterLocomotionState characterState);
+    public delegate void CharacterUpperBodyStateParameterDelegate(CharacterUpperBodyState characterState);
 
     public delegate void FloatParameterDelegate(float value);
     public delegate void DoubleParameterDelegate(double value);
