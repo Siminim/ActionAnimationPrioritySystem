@@ -1,21 +1,30 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class Character : CharacterBody3D
 {
+    // ----------------------------------------------------------------------------------
+    // ------------------------------------ Nodes ---------------------------------------
+    // ---------------------------------------------------------------------------------- 
+
+    private Area3D hurtbox;
+    public Area3D Hurtbox => hurtbox;
+
     // ----------------------------------------------------------------------------------
     // ---------------------------------- Delegates -------------------------------------
     // ---------------------------------------------------------------------------------- 
 
     public Delegates.CharacterMoveStateParameterDelegate OnUpdateMoveState;
     public Delegates.CharacterUpperBodyStateParameterDelegate OnUpdateUpperBodyState;
+    public Delegates.CharacterFullBodyStateParameterDelegate OnUpdateFullBodyState;
 
     // ----------------------------------------------------------------------------------
     // ----------------------------------- Visuals --------------------------------------
     // ---------------------------------------------------------------------------------- 
 
     private CharacterAnimator animator;
-    public void AnimateHead(Basis basisX, Basis basisY) => animator.SetLookingDirection(basisX, basisY);
+    //public void AnimateHead(Basis basisX, Basis basisY) => animator.SetLookingDirection(basisX, basisY);
 
     // ----------------------------------------------------------------------------------
     // ------------------------------ State Conditions ----------------------------------
@@ -23,6 +32,7 @@ public partial class Character : CharacterBody3D
 
     public CharacterLocomotionState moveState = CharacterLocomotionState.Idle;
     public CharacterUpperBodyState upperBodyState = CharacterUpperBodyState.None;
+    public CharacterFullBodyState fullBodyState = CharacterFullBodyState.None;
 
     // ----------------------------------------------------------------------------------
     // ------------------------------ Combat Variables ----------------------------------
@@ -30,6 +40,11 @@ public partial class Character : CharacterBody3D
 
     protected bool weaponsReady = false;
     protected bool blockEnabled = false;
+
+    protected bool queueAttack = false;
+    public bool QueueAttack => queueAttack;
+
+    public WeaponType currentWeapon = WeaponType.Fists;
 
     // ----------------------------------------------------------------------------------
     // ----------------------------- Movement Variables ---------------------------------
@@ -85,7 +100,9 @@ public partial class Character : CharacterBody3D
 
     public override void _EnterTree()
     {
-        animator = new CharacterAnimator();
+        hurtbox = GetNode<Area3D>("Hurtbox");
+
+        animator = new CharacterAnimator(); 
         animator.Initialize(this);
     }
 
@@ -112,7 +129,10 @@ public partial class Character : CharacterBody3D
 
         UpdateMoveState();
         UpdateUpperBodyState();
-        //animator.Update(delta);
+        UpdateFullBodyState();
+
+        animator.Update(delta);
+
     }
 
     // ----------------------------------------------------------------------------------
@@ -121,6 +141,9 @@ public partial class Character : CharacterBody3D
 
     private void Move(double delta)
     {
+        if (fullBodyState != CharacterFullBodyState.None)
+            return;
+
         if (globalMoveVector == Vector3.Zero)
             return;
 
@@ -231,6 +254,12 @@ public partial class Character : CharacterBody3D
         blockEnabled = state;
     }
 
+    protected void SetAttackState(bool state)
+    {
+        weaponsReady = true;
+        queueAttack = state;
+    }
+
     // ----------------------------------------------------------------------------------
     // -------------------------- Move State and Conditions -----------------------------
     // ---------------------------------------------------------------------------------- 
@@ -238,13 +267,17 @@ public partial class Character : CharacterBody3D
     private void UpdateMoveState()
     {
         CharacterLocomotionState newState = CharacterLocomotionState.None;
-    
+
         newState = AirStateUpdate();
-        
+
         if (IsOnFloor())
             newState = GroundStateUpdate();
 
-        OnUpdateMoveState(newState);
+        if (newState != moveState)
+        {
+            OnUpdateMoveState?.Invoke(newState);
+            moveState = newState;
+        }
     }
 
     private CharacterLocomotionState AirStateUpdate()
@@ -323,7 +356,11 @@ public partial class Character : CharacterBody3D
         else
             newState = UpperBodyStateUpdate();
 
-        OnUpdateUpperBodyState(newState);
+        if (newState != upperBodyState)
+        {
+            OnUpdateUpperBodyState?.Invoke(newState);
+            upperBodyState = newState;
+        }
     }
 
     private CharacterUpperBodyState UpperBodyStateUpdate()
@@ -334,14 +371,42 @@ public partial class Character : CharacterBody3D
         return CharacterUpperBodyState.WeaponsReady;
     }
 
+    // ----------------------------------------------------------------------------------
+    // ------------------------ Full Body State and Conditions --------------------------
+    // ---------------------------------------------------------------------------------- 
+
+    private void UpdateFullBodyState()
+    {
+        if (fullBodyState != CharacterFullBodyState.None)
+            return;
+
+        CharacterFullBodyState newState = CharacterFullBodyState.None;
+
+        if (!IsOnFloor() || blockEnabled || sprintEnabled)
+            newState = CharacterFullBodyState.None;
+        else if (queueAttack)
+        {
+            queueAttack = false;
+            newState = CharacterFullBodyState.Attack;
+        }
+
+        if (newState != fullBodyState)
+        {
+            OnUpdateFullBodyState?.Invoke(newState);
+            fullBodyState = newState;
+        }
+    }
+
+    // ----------------------------------------------------------------------------------
+    // ------------------------ Full Body State and Conditions --------------------------
+    // ---------------------------------------------------------------------------------- 
+
+
+
 }
 
 public enum CharacterLocomotionState
 {
-    // ----------------------------------------------------------------------------------
-    // ------------------------------- Movement States ----------------------------------
-    // ---------------------------------------------------------------------------------- 
-
     None,
 
     Idle,
@@ -363,5 +428,30 @@ public enum CharacterUpperBodyState
     None,
 
     WeaponsReady,
-    Blocking
+
+    Blocking,
+    Casting
+}
+
+public enum CharacterFullBodyState
+{
+    None,
+
+    Attack,
+    Casting,
+    Action
+}
+
+public enum WeaponType
+{
+    None,
+    Fists
+}
+
+public enum ActionType
+{
+    None,
+
+    Fists_Attack_1,
+    Fists_Attack_2
 }

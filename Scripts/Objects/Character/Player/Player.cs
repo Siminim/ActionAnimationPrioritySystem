@@ -35,8 +35,10 @@ public partial class Player : Character
         JumpInput();
         ReadyWeaponInput();
         BlockInput();
+        AttackInput();
 
-        AnimateHead(playerCamera.Basis, playerCamera.SpringArmBasis);
+
+        //AnimateHead(playerCamera.Basis, playerCamera.SpringArmBasis);
 
         base._PhysicsProcess(delta);
     }
@@ -77,14 +79,17 @@ public partial class Player : Character
     }
     public void SprintInput()
     {
-        sprintEnabled = Input.IsActionPressed("Sprint");
+        if (Input.IsActionPressed("Sprint") && localMoveVector != Vector3.Zero)
+            sprintEnabled = true;
+        else
+            sprintEnabled = false;
     }
 
     public void JumpInput()
     {
         if (Input.IsActionJustPressed("Jump"))
             QueueJump();
-        
+
         if (Input.IsActionJustReleased("Jump"))
             EndJumpEarly();
     }
@@ -102,5 +107,11 @@ public partial class Player : Character
 
         if (Input.IsActionJustReleased("Block"))
             SetBlockState(false);
+    }
+
+    public void AttackInput()
+    {
+        if (Input.IsActionJustPressed("Attack"))
+            SetAttackState(true);
     }
 }
