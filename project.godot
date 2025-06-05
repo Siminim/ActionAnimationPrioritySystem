@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 Raycast="*res://Scripts/Utility/Raycast.cs"
 
+[debug_draw_3d]
+
+settings/updates/check_for_updates=false
+
 [dotnet]
 
 project/assembly_name="Third Person Action Game"
