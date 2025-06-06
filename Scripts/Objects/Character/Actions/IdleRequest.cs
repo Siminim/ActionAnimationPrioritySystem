@@ -2,15 +2,18 @@ using Godot;
 
 public class IdleRequest : ActionRequest
 {
-    public IdleRequest(Character character) : base(character)
+    public IdleRequest()
     {
-        animName = CharacterAnimation.Idle;
+        actionName = CharacterAction.Idle;
         actionLayer = ActionLayer.Legs;
         priority = 0;
     }
 
-    public override void UpdateState(double delta)
+    public override void Animate(double delta, CharacterAnimator animator)
     {
-        
+        if (animator.character.crouchEnabled)
+            animator.AnimateLocoCrouched(delta, 0.0f);
+        else
+            animator.AnimateLocoStanding(delta, 0.0f);
     }
 }

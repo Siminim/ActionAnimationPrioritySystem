@@ -6,8 +6,6 @@ public partial class Player : Character
     protected Vector3 localMoveVector = Vector3.Zero;
     private PlayerCamera playerCamera;
 
-    private ActionRequest currentMoveAction;
-
     public override void _EnterTree()
     {
         base._EnterTree();
@@ -26,12 +24,14 @@ public partial class Player : Character
 
     public override void _PhysicsProcess(double delta)
     {
-        //SprintInput();
         //JumpInput();
         //ReadyWeaponInput();
         //BlockInput();
 
+        SprintInput();
         WalkInput();
+        CrouchInput();
+
         MovementInput();
 
         base._PhysicsProcess(delta);
@@ -48,6 +48,7 @@ public partial class Player : Character
             return;
 
         playerCamera.RotateArm(-mouseMotion.Relative.X, -mouseMotion.Relative.Y);
+        animator.UpdateLookingAngle(playerCamera.GetLookDirection());
     }
 
     public void MovementInput()
@@ -61,31 +62,21 @@ public partial class Player : Character
         {
             if (sprintEnabled) // if sprinting
             {
-                if (currentMoveAction is SprintRequest)
-                    return;
-
-                crouchEnabled = false;
-                currentMoveAction = actionManager.RequestAction(new SprintRequest(this)); 
+                SetCrouchedState(false);
+                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Sprint]); 
             }
             else if (!walkEnabled) // if running
             {
-                if (currentMoveAction is RunRequest)
-                    return;
-
-                currentMoveAction = actionManager.RequestAction(new RunRequest(this));
+                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Run]);
             }
             else if (walkEnabled) // if walking
             {
-                if (currentMoveAction is WalkRequest)
-                    return;
-
-               currentMoveAction = actionManager.RequestAction(new WalkRequest(this));
+                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Walk]);
             }
         }
-
-        else if (currentMoveAction is not IdleRequest) // if not moving
+        else // if not moving
         {
-            currentMoveAction = actionManager.RequestAction(new IdleRequest(this));
+            actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Idle]);
         }
     }
 
@@ -104,7 +95,7 @@ public partial class Player : Character
     public void CrouchInput()
     {
         if (Input.IsActionJustPressed("Crouch"))
-            crouchEnabled = !crouchEnabled;
+            SetCrouchedState(!crouchEnabled);
     }
 
     public void JumpInput()
@@ -116,18 +107,18 @@ public partial class Player : Character
             EndJumpEarly();
     }
 
-    public void ReadyWeaponInput()
-    {
-        if (Input.IsActionJustPressed("ReadyWeapon"))
-            InvertWeaponReadyState();
-    }
+    // public void ReadyWeaponInput()
+    // {
+    //     if (Input.IsActionJustPressed("ReadyWeapon"))
+    //         InvertWeaponReadyState();
+    // }
 
-    public void BlockInput()
-    {
-        if (Input.IsActionJustPressed("Block"))
-            SetBlockState(true);
+    // public void BlockInput()
+    // {
+    //     if (Input.IsActionJustPressed("Block"))
+    //         SetBlockState(true);
 
-        if (Input.IsActionJustReleased("Block"))
-            SetBlockState(false);
-    }
+    //     if (Input.IsActionJustReleased("Block"))
+    //         SetBlockState(false);
+    // }
 }

@@ -13,7 +13,7 @@ public class ActionManager
         this.character = character;
     }
 
-    public ActionRequest RequestAction(ActionRequest request)
+    public void RequestAction(ActionRequest request)
     {
         List<ActionRequest> actionsToRemove = new List<ActionRequest>();
 
@@ -22,7 +22,7 @@ public class ActionManager
             if ((activeActions[i].actionLayer & request.actionLayer) != 0)
             {
                 if (activeActions[i].priority > request.priority)
-                    return null;
+                    return;
 
                 actionsToRemove.Add(activeActions[i]);
             }
@@ -36,24 +36,32 @@ public class ActionManager
         }
 
         activeActions.Add(request);
-        request.EnterState();
-
-        return request;
+        request.EnterState(character);
     }
 
-    public void Update(double delta)
+    public void Process(double delta)
+    {
+        RemoveActions();
+        UpdateActions(delta);
+        CheckRelevance();
+    }
+
+    private void RemoveActions()
     {
         foreach (ActionRequest action in actionsToRemove)
         {
-            action.ExitState();
+            action.ExitState(character);
             activeActions.Remove(action);
         }
-        
-        actionsToRemove.Clear();
 
-        for (int i = activeActions.Count - 1; i >= 0; i--)
+        actionsToRemove.Clear();
+    }
+
+    public void UpdateActions(double delta)
+    {
+        for (int i = 0; i < activeActions.Count; i++)
         {
-            activeActions[i].UpdateState(delta);
+            activeActions[i].UpdateState(delta, character);
 
             if (activeActions[i].isOnTimer)
             {
@@ -65,6 +73,22 @@ public class ActionManager
         }
     }
 
+    public void CheckRelevance()
+    {
+        for (int i = 0; i < activeActions.Count; i++)
+        {
+            activeActions[i].CheckRelevance(character);
+        }
+    }
+
+    public void Animate(double delta)
+    {
+        for (int i = 0; i < activeActions.Count; i++)
+        {
+            activeActions[i].Animate(delta, character.animator);
+        }
+    }
+
     public void EndAction(ActionRequest action)
     {
         actionsToRemove.AddLast(action);
@@ -72,7 +96,7 @@ public class ActionManager
 
     public void EndActionByType<T>() where T : ActionRequest
     {
-        for (int i = activeActions.Count - 1; i >= 0; i--)
+        for (int i = 0; i < activeActions.Count; i++)
         {
             if (activeActions[i] is T)
             {

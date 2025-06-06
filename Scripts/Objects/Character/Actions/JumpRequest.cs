@@ -2,14 +2,14 @@ using Godot;
 
 public class JumpRequest : ActionRequest
 {
-    public JumpRequest(Character character) : base(character) 
+    public JumpRequest()
     { 
-        animName = CharacterAnimation.Jump;
+        //actionName = CharacterAction.Jump;
         actionLayer = ActionLayer.Legs;
         priority = 5;
     }
 
-    public override void UpdateState(double delta)
+    public override void UpdateState(double delta, Character character)
     {
         if (character.queuedJump && (character.IsOnFloor() || character.coyoteTimer < character.coyoteTimeLimit) && character.Velocity.Y <= 0.0f)
         {

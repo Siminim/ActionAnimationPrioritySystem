@@ -10,7 +10,7 @@ public partial class PlayerCamera : Node3D
     private Camera3D camera;
 
     [Export] public float sensitivity = 0.00175f;
-    
+
     private float lerpSpeed = 15.0f;
 
     public override void _EnterTree()
@@ -34,7 +34,7 @@ public partial class PlayerCamera : Node3D
     {
         RotateY(x * sensitivity);
         springArmPivot.RotateX(y * sensitivity);
-        
+
         float clampX = Mathf.Clamp(springArmPivot.Rotation.X, -Mathf.DegToRad(89.5f), Mathf.DegToRad(55.0f));
         springArmPivot.Rotation = new Vector3(clampX, springArmPivot.Rotation.Y, springArmPivot.Rotation.Z);
     }
@@ -46,6 +46,11 @@ public partial class PlayerCamera : Node3D
 
         float clampX = Mathf.Clamp(camera.Rotation.X, -Mathf.DegToRad(89.5f), Mathf.DegToRad(89.5f));
         camera.Rotation = new Vector3(clampX, camera.Rotation.Y, camera.Rotation.Z);
+    }
+
+    public Vector2 GetLookDirection()
+    {
+        return new Vector2(springArmPivot.Rotation.X, Rotation.Y);
     }
 
 }

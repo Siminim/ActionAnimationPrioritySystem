@@ -3,52 +3,41 @@ using System;
 
 public partial class Character : CharacterBody3D
 {
-    // ----------------------------------------------------------------------------------
-    // ---------------------------------- Delegates -------------------------------------
-    // ---------------------------------------------------------------------------------- 
-
-    // public Delegates.CharacterMoveStateParameterDelegate OnUpdateMoveState;
-    // public Delegates.CharacterUpperBodyStateParameterDelegate OnUpdateUpperBodyState;
-
-    // ----------------------------------------------------------------------------------
-    // ----------------------------------- Visuals --------------------------------------
-    // ---------------------------------------------------------------------------------- 
-
     public CharacterAnimator animator { get; private set; }
     public ActionManager actionManager { get; private set; }
-  
+
     // ----------------------------------------------------------------------------------
     // ------------------------------ Combat Variables ----------------------------------
     // ---------------------------------------------------------------------------------- 
 
-    protected bool weaponsReady = false;
-    protected bool blockEnabled = false;
+    //protected bool weaponsReady = false;
+    //protected bool blockEnabled = false;
 
     // ----------------------------------------------------------------------------------
     // ----------------------------- Movement Variables ---------------------------------
     // ---------------------------------------------------------------------------------- 
 
-    public bool walkEnabled             { get; protected set; } = false;
-    public bool sprintEnabled           { get; protected set; } = false;
-    public bool crouchEnabled           { get; protected set; } = false;
+    public bool crouchEnabled { get; private set; } = false;
+    public bool walkEnabled { get; protected set; } = false;
+    public bool sprintEnabled { get; protected set; } = false;
 
-    public Vector3 globalMoveVector     { get; private set; } = Vector3.Zero;
+    public Vector3 globalMoveVector { get; private set; } = Vector3.Zero;
 
-    public float airSpeed               { get; private set; } = 5.0f;
-    public float airAcceleration        { get; private set; } = 0.5f;
+    public float airSpeed { get; private set; } = 5.0f;
+    public float airAcceleration { get; private set; } = 0.5f;
 
-    public float walkSpeed              { get; private set; } = 2.0f;
-    public float walkAcceleration       { get; private set; } = 3.0f;
+    public float walkSpeed { get; private set; } = 2.0f;
+    public float walkAcceleration { get; private set; } = 3.0f;
 
-    public float runSpeed               { get; private set; } = 6.0f;
-    public float runAcceleration        { get; private set; } = 3.0f;
+    public float runSpeed { get; private set; } = 6.0f;
+    public float runAcceleration { get; private set; } = 3.0f;
 
-    public float sprintSpeed            { get; private set; } = 10.0f;
-    public float sprintAcceleration     { get; private set; } = 5.0f;
+    public float sprintSpeed { get; private set; } = 10.0f;
+    public float sprintAcceleration { get; private set; } = 5.0f;
 
-    public float maxFallSpeed           { get; private set; } = -50.0f;
+    public float maxFallSpeed { get; private set; } = -50.0f;
 
-    public float frictionStrength       { get; private set; } = 0.85f;
+    public float frictionStrength { get; private set; } = 0.85f;
 
     // ----------------------------------------------------------------------------------
     // ------------------------------ Jump Variables ------------------------------------
@@ -74,9 +63,7 @@ public partial class Character : CharacterBody3D
 
     public override void _EnterTree()
     {
-        animator = new CharacterAnimator();
-        animator.Initialize(this);
-        
+        animator = new CharacterAnimator(this);
         actionManager = new ActionManager(this);
     }
 
@@ -92,10 +79,12 @@ public partial class Character : CharacterBody3D
 
     public override void _PhysicsProcess(double delta)
     {
-        actionManager.Update(delta);
+        actionManager.Process(delta);
+        actionManager.Animate(delta);
 
         ApplyGravity(delta);
         ApplyFriction(delta);
+
 
         MoveAndSlide();
     }
@@ -167,13 +156,25 @@ public partial class Character : CharacterBody3D
         Velocity += GetGravity().Normalized() * velocityMod * jumpDecay;
     }
 
-    protected void InvertWeaponReadyState()
+    protected void SetCrouchedState(bool state)
     {
-        weaponsReady = !weaponsReady;
+        crouchEnabled = state;
+
+        if (!IsOnFloor())
+            animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Air.ToString());
+        else if (crouchEnabled)
+            animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Crouched.ToString());
+        else
+            animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
     }
 
-    protected void SetBlockState(bool state)
-    {
-        blockEnabled = state;
-    }
+    // protected void InvertWeaponReadyState()
+    // {
+    //     weaponsReady = !weaponsReady;
+    // }
+
+    // protected void SetBlockState(bool state)
+    // {
+    //     blockEnabled = state;
+    // }
 }
