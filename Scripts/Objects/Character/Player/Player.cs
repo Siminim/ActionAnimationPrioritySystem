@@ -25,10 +25,10 @@ public partial class Player : Character
 
     public override void _PhysicsProcess(double delta)
     {
-        //JumpInput();
         //ReadyWeaponInput();
         //BlockInput();
 
+        JumpInput();
         SprintInput();
         WalkInput();
         CrouchInput();

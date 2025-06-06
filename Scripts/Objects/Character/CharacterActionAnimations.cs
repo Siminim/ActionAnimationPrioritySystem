@@ -10,7 +10,9 @@ public static class CharacterActionLibrary
         { CharacterAction.Walk_Crouched, new WalkCrouchedRequest() },
         { CharacterAction.Run, new RunRequest() },
         { CharacterAction.Sprint, new SprintRequest() },
-        { CharacterAction.Fall, new FallRequest() }
+        { CharacterAction.Fall, new FallRequest() },
+        { CharacterAction.Jump, new JumpRequest() },
+        { CharacterAction.Land, new LandRequest() }
     };
 }
 
@@ -30,7 +32,9 @@ public enum CharacterAction : byte
     Walk_Crouched,
     Run,
     Sprint,
-    Fall
+    Fall,
+    Jump,
+    Land
 
 
 }

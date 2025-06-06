@@ -15,17 +15,28 @@ public partial class CharacterAnimator
 
     public AnimationNodeStateMachinePlayback animLocomotionStateMachine;
 
-    // ----------------------------------------------------------------------------------
-    // ---------------------------- Animation Variables ---------------------------------
-    // ---------------------------------------------------------------------------------- 
-
     public Vector2 lookingVector = Vector2.Zero;
+
+    #region locomotion variables
+
     public Vector2 locomotionBlendspace2DVector = Vector2.Zero;
-
     public float moveAngle = 0.0f;
-    public float locomotionBlendspace2DTransitionSpeed = 4.0f;
 
-    public float turnSpeed = 3.0f;
+    #endregion
+
+    #region air variables
+
+    public float airSpeed = 0.0f;
+    public float landingScale = 0.0f;
+
+    #endregion
+
+    #region Properties
+
+    public readonly float locomotionBlendspace2DTransitionSpeed = 4.0f;
+    public readonly float turnSpeed = 3.0f;
+
+    #endregion
 
     //public float upperBodyBlendValue = 0.0f;
     //public float upperBodyBlendTransitionSpeed = 5.0f;
@@ -33,9 +44,6 @@ public partial class CharacterAnimator
     //public Vector2 headTurn = Vector2.Zero;
     //public float headTurnTransitionSpeed = 2.5f;
 
-    // ----------------------------------------------------------------------------------
-    // ------------------------------- Initialization -----------------------------------
-    // ---------------------------------------------------------------------------------- 
 
     public CharacterAnimator(Character character)
     {
@@ -88,14 +96,14 @@ public partial class CharacterAnimator
         animationTree.Set("parameters/Locomotion/Loco_Crouched/blend_position", locomotionBlendspace2DVector);
     }
 
-    public Vector2 UpdateVariablesAirDirections(double delta, float scale)
+    public Vector2 UpdateVariablesAirDirections(double delta)
     {
-        return new Vector2(scale, 0.0f);
+        return new Vector2(airSpeed, landingScale);
     }
 
-    public void AnimateLocoAir(double delta, float scale)
+    public void AnimateLocoAir(double delta)
     {
-        Vector2 vec = UpdateVariablesAirDirections(delta, scale);
+        Vector2 vec = UpdateVariablesAirDirections(delta);
         animationTree.Set("parameters/Locomotion/Loco_Air/blend_position", vec);
     }
 

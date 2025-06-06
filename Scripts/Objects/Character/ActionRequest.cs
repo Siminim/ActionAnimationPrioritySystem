@@ -11,6 +11,7 @@ abstract public class ActionRequest
     public virtual void EnterState(Character character) { }
     public virtual void UpdateState(double delta, Character character) { }
     public virtual void ExitState(Character character) { }
+    public virtual void CancelState(Character character) {}
 
     public virtual void CheckRelevance(Character character) { }
     public virtual void Animate(double delta, CharacterAnimator animator) { }

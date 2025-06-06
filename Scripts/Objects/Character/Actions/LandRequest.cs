@@ -1,16 +1,17 @@
 using Godot;
 
-public class FallRequest : ActionRequest
+public class LandRequest : ActionRequest
 {
-    public FallRequest()
+    public LandRequest()
     {
-        actionName = CharacterAction.Fall;
+        actionName = CharacterAction.Land;
         actionLayer = ActionLayer.Legs;
-        priority = 4;
+        priority = 6;
     }
 
     public override void EnterState(Character character)
     {
+        character.animator.landingScale = 0.0f;
         character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Air.ToString());
     }
 
@@ -27,15 +28,14 @@ public class FallRequest : ActionRequest
         float speed = new Vector3(character.Velocity.X, 0, character.Velocity.Z).Length();
         animator.airSpeed = 1 - ((character.airSpeed - speed) / character.airSpeed);
 
+        animator.landingScale += (float)delta * 7.5f;
+
         animator.AnimateLocoAir(delta);
     }
 
     public override void CheckRelevance(Character character)
     {
-        if (character.IsOnFloor())
-        {
-            character.actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Land]);
+        if (character.animator.landingScale >= 1.0f)
             EndAction(character);
-        }
     }
 }

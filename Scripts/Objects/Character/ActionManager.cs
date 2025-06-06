@@ -6,7 +6,8 @@ public class ActionManager
     //private CharacterAnimator animator;
     private Character character;
     private List<ActionRequest> activeActions = new List<ActionRequest>();
-    private LinkedList<ActionRequest> actionsToRemove = new LinkedList<ActionRequest>();
+    private List<ActionRequest> actionsToRemove = new List<ActionRequest>();
+    private List<ActionRequest> cancelledActions = new List<ActionRequest>();
 
     public ActionManager(Character character)
     {
@@ -41,9 +42,21 @@ public class ActionManager
 
     public void Process(double delta)
     {
+        CancelActions();
         RemoveActions();
         UpdateActions(delta);
         CheckRelevance();
+    }
+
+    private void CancelActions()
+    {
+        foreach (ActionRequest action in cancelledActions)
+        {
+            action.CancelState(character);
+            EndAction(action);
+        }
+
+        cancelledActions.Clear();
     }
 
     private void RemoveActions()
@@ -89,9 +102,28 @@ public class ActionManager
         }
     }
 
+    public void CancelAction(ActionRequest action)
+    {
+        if (!activeActions.Contains(action) || cancelledActions.Contains(action)) return;
+            cancelledActions.Add(action);
+    }
+
     public void EndAction(ActionRequest action)
     {
-        actionsToRemove.AddLast(action);
+        if (!activeActions.Contains(action) || actionsToRemove.Contains(action)) return;
+            actionsToRemove.Add(action);
+    }
+
+    public void CancelActionByType<T>() where T : ActionRequest
+    {
+        for (int i = 0; i < activeActions.Count; i++)
+        {
+            if (activeActions[i] is T)
+            {
+                CancelAction(activeActions[i]);
+                return;
+            }
+        }
     }
 
     public void EndActionByType<T>() where T : ActionRequest

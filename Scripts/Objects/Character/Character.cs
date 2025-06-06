@@ -83,6 +83,8 @@ public partial class Character : CharacterBody3D
 
     public override void _PhysicsProcess(double delta)
     {
+        Jump(delta);
+
         actionManager.Process(delta);
         actionManager.Animate(delta);
 
@@ -96,22 +98,6 @@ public partial class Character : CharacterBody3D
     // ----------------------------------------------------------------------------------
     // -------------------------- Always Active Functions -------------------------------
     // ---------------------------------------------------------------------------------- 
-
-    // private void Jump(double delta)
-    // {
-    //     if (queuedJump && (IsOnFloor() || coyoteTimer < coyoteTimeLimit) && Velocity.Y <= 0.0f)
-    //     {
-    //         Velocity -= GetGravity().Normalized() * jumpForce;
-
-    //         queuedJump = false;
-    //         coyoteTimer = coyoteTimeLimit;
-    //     }
-
-    //     timeSinceQueuedJump += (float)delta;
-
-    //     if (timeSinceQueuedJump >= jumpBuffer)
-    //         queuedJump = false;
-    // }
 
     private void ApplyGravity(double delta)
     {
@@ -154,13 +140,20 @@ public partial class Character : CharacterBody3D
         queuedJump = true;
     }
 
+    private void Jump(double delta)
+    {
+        if (queuedJump && (IsOnFloor() || coyoteTimer < coyoteTimeLimit) && Velocity.Y <= 0.0f)
+            actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Jump]);
+
+        timeSinceQueuedJump += (float)delta;
+
+        if (timeSinceQueuedJump >= jumpBuffer)
+            queuedJump = false;
+    }
+
     protected void EndJumpEarly()
     {
-        if (Velocity.Y <= 0.0f)
-            return;
-
-        float velocityMod = Velocity.Y * 0.25f;
-        Velocity += GetGravity().Normalized() * velocityMod * jumpDecay;
+        actionManager.CancelAction(CharacterActionLibrary.Actions[CharacterAction.Jump]);
     }
 
     // protected void InvertWeaponReadyState()
