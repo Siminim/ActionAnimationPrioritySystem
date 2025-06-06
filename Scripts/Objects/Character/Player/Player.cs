@@ -3,8 +3,9 @@ using System;
 
 public partial class Player : Character
 {
-    protected Vector3 localMoveVector = Vector3.Zero;
     private PlayerCamera playerCamera;
+
+    protected Vector3 localMoveVector = Vector3.Zero;
 
     public override void _EnterTree()
     {
@@ -58,29 +59,32 @@ public partial class Player : Character
         localMoveVector = new Vector3(inputDir.X, 0, inputDir.Y);
         SetMoveVector((playerCamera.Basis * localMoveVector).Normalized());
 
-        if (inputDir != Vector2.Zero)
+        if (!IsOnFloor())
+        {
+            actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Fall]);
+        }
+        else if (inputDir != Vector2.Zero)
         {
             if (sprintEnabled) // if sprinting
-            {
-                SetCrouchedState(false);
-                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Sprint]); 
-            }
-            else if (!walkEnabled) // if running
-            {
+                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Sprint]);
+
+            if (crouchEnabled)
+                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Walk_Crouched]);
+
+            if (!walkEnabled) // if running
                 actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Run]);
-            }
-            else if (walkEnabled) // if walking
-            {
+            else
                 actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Walk]);
-            }
+
         }
         else // if not moving
         {
-            actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Idle]);
+            if (crouchEnabled)
+                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Idle_Crouched]);
+            else
+                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Idle]);
         }
     }
-
-
 
     public void WalkInput()
     {
@@ -88,14 +92,14 @@ public partial class Player : Character
             walkEnabled = !walkEnabled;
     }
     public void SprintInput()
-    {
+    {  
         sprintEnabled = Input.IsActionPressed("Sprint");
     }
 
     public void CrouchInput()
     {
         if (Input.IsActionJustPressed("Crouch"))
-            SetCrouchedState(!crouchEnabled);
+            crouchEnabled = !crouchEnabled;
     }
 
     public void JumpInput()

@@ -1,17 +1,17 @@
 using Godot;
 
-public class WalkRequest : ActionRequest
+public class WalkCrouchedRequest : ActionRequest
 {
-    public WalkRequest()
+    public WalkCrouchedRequest()
     {
-        actionName = CharacterAction.Walk;
+        actionName = CharacterAction.Walk_Crouched;
         actionLayer = ActionLayer.Legs;
-        priority = 1;
+        priority = 2;
     }
 
     public override void EnterState(Character character)
     {
-        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Crouched.ToString());
     }
 
     public override void UpdateState(double delta, Character character)
@@ -26,12 +26,12 @@ public class WalkRequest : ActionRequest
     public override void Animate(double delta, CharacterAnimator animator)
     {
         animator.TurnToMoveDirection(delta);
-        animator.AnimateLocoStanding(delta, 0.3f);
+        animator.AnimateLocoCrouched(delta, 0.3f);
     }
-    
+
     public override void CheckRelevance(Character character)
     {
-        if (character.globalMoveVector == Vector3.Zero)
+        if (character.globalMoveVector == Vector3.Zero || !character.crouchEnabled)
             EndAction(character);
     }
 }

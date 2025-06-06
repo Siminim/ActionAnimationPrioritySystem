@@ -9,11 +9,13 @@ public class IdleRequest : ActionRequest
         priority = 0;
     }
 
+    public override void EnterState(Character character)
+    {
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
+    }
+
     public override void Animate(double delta, CharacterAnimator animator)
     {
-        if (animator.character.crouchEnabled)
-            animator.AnimateLocoCrouched(delta, 0.0f);
-        else
-            animator.AnimateLocoStanding(delta, 0.0f);
+        animator.AnimateLocoStanding(delta, 0.0f);
     }
 }

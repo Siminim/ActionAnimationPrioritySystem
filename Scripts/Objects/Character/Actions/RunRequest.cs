@@ -6,7 +6,12 @@ public class RunRequest : ActionRequest
     {
         actionName = CharacterAction.Run;
         actionLayer = ActionLayer.Legs;
-        priority = 2;
+        priority = 1;
+    }
+
+    public override void EnterState(Character character)
+    {
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
     }
 
     public override void UpdateState(double delta, Character character)
@@ -18,19 +23,15 @@ public class RunRequest : ActionRequest
         character.Velocity += targetVelocity * moveAcceleration * (float)delta;
     }
 
+    public override void Animate(double delta, CharacterAnimator animator)
+    {
+        animator.TurnToMoveDirection(delta);
+        animator.AnimateLocoStanding(delta, 0.6f);
+    }
+
     public override void CheckRelevance(Character character)
     {
         if (character.walkEnabled || character.globalMoveVector == Vector3.Zero)
             EndAction(character);
-    }
-
-    public override void Animate(double delta, CharacterAnimator animator)
-    {
-        animator.TurnToMoveDirection(delta);
-
-        if (animator.character.crouchEnabled)
-            animator.AnimateLocoCrouched(delta, 0.6f);
-        else
-            animator.AnimateLocoStanding(delta, 0.6f);
     }
 }

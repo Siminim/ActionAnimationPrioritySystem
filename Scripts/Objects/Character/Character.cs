@@ -13,15 +13,27 @@ public partial class Character : CharacterBody3D
     //protected bool weaponsReady = false;
     //protected bool blockEnabled = false;
 
-    // ----------------------------------------------------------------------------------
-    // ----------------------------- Movement Variables ---------------------------------
-    // ---------------------------------------------------------------------------------- 
-
-    public bool crouchEnabled { get; private set; } = false;
-    public bool walkEnabled { get; protected set; } = false;
-    public bool sprintEnabled { get; protected set; } = false;
+    #region Locomotion and Speed variables
 
     public Vector3 globalMoveVector { get; private set; } = Vector3.Zero;
+
+    public bool crouchEnabled = false;
+    public bool walkEnabled = false;
+    public bool sprintEnabled = false;
+
+    #endregion
+
+    #region Jumping and Gravity variables
+
+    public bool queuedJump = false;
+    private bool onGround = false;
+
+    public float timeSinceQueuedJump = 0.0f;
+    public float coyoteTimer = 0.0f;
+
+    #endregion
+
+    #region Locomotion and Speed properties
 
     public float airSpeed { get; private set; } = 5.0f;
     public float airAcceleration { get; private set; } = 0.5f;
@@ -37,29 +49,21 @@ public partial class Character : CharacterBody3D
 
     public float maxFallSpeed { get; private set; } = -50.0f;
 
-    public float frictionStrength { get; private set; } = 0.85f;
+    public float groundFrictionStrength { get; private set; } = 0.85f;
+    public float airFrictionStrength { get; private set; } = 0.2f;
 
-    // ----------------------------------------------------------------------------------
-    // ------------------------------ Jump Variables ------------------------------------
-    // ---------------------------------------------------------------------------------- 
+    #endregion
 
-    public bool queuedJump = false;
-    private bool onGround = false;
+    #region Jumping and Gravity properties
 
     public float jumpForce = 8.5f;
-
-    public float timeSinceQueuedJump = 0.0f;
-
     public float jumpBuffer = 0.125f;
-
     public float jumpDecay = 2.0f;
 
-    public float coyoteTimer = 0.0f;
     public float coyoteTimeLimit = 0.3f;
 
-    // ----------------------------------------------------------------------------------
-    // -------------------------- Default Godot Functions -------------------------------
-    // ---------------------------------------------------------------------------------- 
+    #endregion
+
 
     public override void _EnterTree()
     {
@@ -125,7 +129,10 @@ public partial class Character : CharacterBody3D
             return;
 
         Vector3 normalFriction = new Vector3(Velocity.X, 0, Velocity.Z).Normalized();
+
+        float frictionStrength = IsOnFloor() ? groundFrictionStrength : airFrictionStrength;
         Vector3 totalFriction = normalFriction * frictionStrength;
+
         Velocity -= totalFriction;
 
         if (Velocity.LengthSquared() < 0.5f)
@@ -156,18 +163,6 @@ public partial class Character : CharacterBody3D
         Velocity += GetGravity().Normalized() * velocityMod * jumpDecay;
     }
 
-    protected void SetCrouchedState(bool state)
-    {
-        crouchEnabled = state;
-
-        if (!IsOnFloor())
-            animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Air.ToString());
-        else if (crouchEnabled)
-            animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Crouched.ToString());
-        else
-            animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
-    }
-
     // protected void InvertWeaponReadyState()
     // {
     //     weaponsReady = !weaponsReady;
@@ -177,4 +172,5 @@ public partial class Character : CharacterBody3D
     // {
     //     blockEnabled = state;
     // }
+
 }

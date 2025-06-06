@@ -19,14 +19,13 @@ public partial class CharacterAnimator
     // ---------------------------- Animation Variables ---------------------------------
     // ---------------------------------------------------------------------------------- 
 
-    public float moveAngle = 0.0f;
-    //public float moveScale = 1.0f;
-    public float locomotionBlendspace2DTransitionSpeed = 10.0f;
-
-    public float turnSpeed = 3.0f;
-
     public Vector2 lookingVector = Vector2.Zero;
     public Vector2 locomotionBlendspace2DVector = Vector2.Zero;
+
+    public float moveAngle = 0.0f;
+    public float locomotionBlendspace2DTransitionSpeed = 4.0f;
+
+    public float turnSpeed = 3.0f;
 
     //public float upperBodyBlendValue = 0.0f;
     //public float upperBodyBlendTransitionSpeed = 5.0f;
@@ -89,9 +88,15 @@ public partial class CharacterAnimator
         animationTree.Set("parameters/Locomotion/Loco_Crouched/blend_position", locomotionBlendspace2DVector);
     }
 
+    public Vector2 UpdateVariablesAirDirections(double delta, float scale)
+    {
+        return new Vector2(scale, 0.0f);
+    }
+
     public void AnimateLocoAir(double delta, float scale)
     {
-
+        Vector2 vec = UpdateVariablesAirDirections(delta, scale);
+        animationTree.Set("parameters/Locomotion/Loco_Air/blend_position", vec);
     }
 
     // public float GetAnimationDuration(CharacterAnimation animName)

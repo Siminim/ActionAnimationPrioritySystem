@@ -9,6 +9,12 @@ public class SprintRequest : ActionRequest
         priority = 3;
     }
 
+    public override void EnterState(Character character)
+    {
+        character.crouchEnabled = false;
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
+    }
+
     public override void UpdateState(double delta, Character character)
     {
         float moveSpeed = character.sprintSpeed;
