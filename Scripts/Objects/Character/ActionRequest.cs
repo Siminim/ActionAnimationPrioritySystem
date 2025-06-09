@@ -1,8 +1,8 @@
 abstract public class ActionRequest
 {
     public CharacterAction actionName;
-    public CharacterAnimation animName;
-    public ActionLayer actionLayer = ActionLayer.None;
+    public CharacterAnimStateMachineName animName;
+    public CharacterActionLayer actionLayer = CharacterActionLayer.None;
     public int priority = 0;
     public bool isOnTimer = false;
     public float timeRemaining = 0.0f;
@@ -19,14 +19,3 @@ abstract public class ActionRequest
     public void EndAction(Character character) => character.actionManager.EndAction(this);
 }
 
-public enum ActionLayer
-{
-    None = 0,
-    Legs = 1 << 0,
-    UpperBody = 1 << 1,
-    LeftArm = 1 << 2,
-    Head = 1 << 3,
-    
-    FullbodyOverride = 1 << 4 | Legs | UpperBody | LeftArm | Head,
-
-}

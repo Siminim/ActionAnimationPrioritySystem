@@ -5,14 +5,14 @@ public class SprintRequest : ActionRequest
     public SprintRequest()
     {
         actionName = CharacterAction.Sprint;
-        actionLayer = ActionLayer.FullbodyOverride;
+        actionLayer = CharacterActionLayer.Legs;
         priority = 3;
     }
 
     public override void EnterState(Character character)
     {
         character.crouchEnabled = false;
-        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Standing.ToString());
     }
 
     public override void UpdateState(double delta, Character character)

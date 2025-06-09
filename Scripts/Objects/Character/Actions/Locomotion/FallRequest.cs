@@ -5,13 +5,14 @@ public class FallRequest : ActionRequest
     public FallRequest()
     {
         actionName = CharacterAction.Fall;
-        actionLayer = ActionLayer.Legs;
+        actionLayer = CharacterActionLayer.Legs;
         priority = 4;
     }
 
     public override void EnterState(Character character)
     {
-        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Air.ToString());
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Air.ToString());
+        character.animator.landingScale = 0.0f;
     }
 
     public override void UpdateState(double delta, Character character)

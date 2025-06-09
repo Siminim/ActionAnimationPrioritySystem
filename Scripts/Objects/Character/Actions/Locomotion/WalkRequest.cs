@@ -5,13 +5,13 @@ public class WalkRequest : ActionRequest
     public WalkRequest()
     {
         actionName = CharacterAction.Walk;
-        actionLayer = ActionLayer.Legs;
+        actionLayer = CharacterActionLayer.Legs;
         priority = 1;
     }
 
     public override void EnterState(Character character)
     {
-        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Standing.ToString());
     }
 
     public override void UpdateState(double delta, Character character)

@@ -5,13 +5,13 @@ public class IdleCrouchedRequest : ActionRequest
     public IdleCrouchedRequest()
     {
         actionName = CharacterAction.Idle_Crouched;
-        actionLayer = ActionLayer.Legs;
+        actionLayer = CharacterActionLayer.Legs;
         priority = 0;
     }
 
     public override void EnterState(Character character)
     {
-        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Crouched.ToString());
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Crouched.ToString());
     }
 
     public override void Animate(double delta, CharacterAnimator animator)

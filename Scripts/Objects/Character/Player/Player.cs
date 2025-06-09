@@ -25,9 +25,9 @@ public partial class Player : Character
 
     public override void _PhysicsProcess(double delta)
     {
-        //ReadyWeaponInput();
         //BlockInput();
 
+        ReadyWeaponInput();
         JumpInput();
         SprintInput();
         WalkInput();
@@ -92,7 +92,7 @@ public partial class Player : Character
             walkEnabled = !walkEnabled;
     }
     public void SprintInput()
-    {  
+    {
         sprintEnabled = Input.IsActionPressed("Sprint");
     }
 
@@ -111,11 +111,19 @@ public partial class Player : Character
             EndJumpEarly();
     }
 
-    // public void ReadyWeaponInput()
-    // {
-    //     if (Input.IsActionJustPressed("ReadyWeapon"))
-    //         InvertWeaponReadyState();
-    // }
+    public void ReadyWeaponInput()
+    {
+        if (Input.IsActionJustPressed("ReadyWeapon"))
+            weaponsReady = !weaponsReady;
+    }
+
+    public void UseHeldItem()
+    {
+        if (Input.IsActionJustPressed("UseHeldItem"))
+        {
+            
+        }
+    }
 
     // public void BlockInput()
     // {

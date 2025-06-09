@@ -5,14 +5,14 @@ public class LandRequest : ActionRequest
     public LandRequest()
     {
         actionName = CharacterAction.Land;
-        actionLayer = ActionLayer.Legs;
+        actionLayer = CharacterActionLayer.Legs;
         priority = 6;
     }
 
     public override void EnterState(Character character)
     {
         character.animator.landingScale = 0.0f;
-        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Air.ToString());
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Air.ToString());
     }
 
     public override void UpdateState(double delta, Character character)

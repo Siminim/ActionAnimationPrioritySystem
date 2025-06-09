@@ -10,8 +10,12 @@ public partial class Character : CharacterBody3D
     // ------------------------------ Combat Variables ----------------------------------
     // ---------------------------------------------------------------------------------- 
 
-    //protected bool weaponsReady = false;
-    //protected bool blockEnabled = false;
+    #region Combat variables
+
+    public bool weaponsReady = false;
+    public bool blockEnabled = false;
+
+    #endregion
 
     #region Locomotion and Speed variables
 
@@ -85,12 +89,13 @@ public partial class Character : CharacterBody3D
     {
         Jump(delta);
 
-        actionManager.Process(delta);
-        actionManager.Animate(delta);
+        if (weaponsReady)
+            actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.WeaponsReady]);
+
+        actionManager.Update(delta);
 
         ApplyGravity(delta);
         ApplyFriction(delta);
-
 
         MoveAndSlide();
     }
@@ -155,11 +160,6 @@ public partial class Character : CharacterBody3D
     {
         actionManager.CancelAction(CharacterActionLibrary.Actions[CharacterAction.Jump]);
     }
-
-    // protected void InvertWeaponReadyState()
-    // {
-    //     weaponsReady = !weaponsReady;
-    // }
 
     // protected void SetBlockState(bool state)
     // {

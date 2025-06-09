@@ -1,13 +1,10 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class CharacterAnimator
 {
     public Character character { get; private set; }
-
-    // ----------------------------------------------------------------------------------
-    // ----------------------------------- Nodes ----------------------------------------
-    // ----------------------------------------------------------------------------------
 
     public Skeleton3D skeleton { get; private set; }
     public AnimationPlayer animationPlayer { get; private set; }
@@ -15,34 +12,31 @@ public partial class CharacterAnimator
 
     public AnimationNodeStateMachinePlayback animLocomotionStateMachine;
 
-    public Vector2 lookingVector = Vector2.Zero;
+    public Vector2 lookingVector;
 
-    #region locomotion variables
-
-    public Vector2 locomotionBlendspace2DVector = Vector2.Zero;
+    public Vector2 locomotionBlendspace2DVector;
     public float moveAngle = 0.0f;
-
-    #endregion
-
-    #region air variables
-
-    public float airSpeed = 0.0f;
-    public float landingScale = 0.0f;
-
-    #endregion
-
-    #region Properties
 
     public readonly float locomotionBlendspace2DTransitionSpeed = 4.0f;
     public readonly float turnSpeed = 3.0f;
 
-    #endregion
+    public float airSpeed = 0.0f;
+    public float landingScale = 0.0f;
 
-    //public float upperBodyBlendValue = 0.0f;
-    //public float upperBodyBlendTransitionSpeed = 5.0f;
+    private float locoBodyBlend = 0.0f;
+    private float locoBodyBlendTarget = 0.0f;
+    private float locoBodyBlendTransitionSpeed = 4.0f;
 
-    //public Vector2 headTurn = Vector2.Zero;
-    //public float headTurnTransitionSpeed = 2.5f;
+    private static readonly Dictionary<AnimationParameterPath, StringName> animationPaths = new Dictionary<AnimationParameterPath, StringName>
+    {
+        { AnimationParameterPath.Locomotion_Playback,               "parameters/Locomotion/playback"                                },
+        { AnimationParameterPath.Loco_Standing_BlendPosition,       "parameters/Locomotion/Loco_Standing/blend_position"            },
+        { AnimationParameterPath.Loco_Crouched_BlendPosition,       "parameters/Locomotion/Loco_Crouched/blend_position"            },
+        { AnimationParameterPath.Loco_Air_BlendPosition,            "parameters/Locomotion/Loco_Air/blend_position"                 },
+        { AnimationParameterPath.Loco_Body_Blend,                   "parameters/LocomotionBodyBlend/blend_amount"                   },
+        { AnimationParameterPath.Upperbody_Transition_Request,      "parameters/UpperbodyAnimations/Transition/transition_request"  },
+        { AnimationParameterPath.Upperbody_Transition_CurrentState, "parameters/UpperbodyAnimations/Transition/current_state"       },
+    };
 
 
     public CharacterAnimator(Character character)
@@ -53,13 +47,17 @@ public partial class CharacterAnimator
         animationTree = character.GetNode<AnimationTree>("AnimationTree");
         skeleton = character.GetNode<Skeleton3D>("GeneralSkeleton");
 
-        animLocomotionStateMachine = (AnimationNodeStateMachinePlayback)animationTree.Get("parameters/Locomotion/playback");
+        animLocomotionStateMachine = (AnimationNodeStateMachinePlayback)animationTree.Get(animationPaths[AnimationParameterPath.Locomotion_Playback]);
     }
 
     public void UpdateLookingAngle(Vector2 direction)
     {
         lookingVector = direction;
     }
+
+    // ----------------------------------------------------------------------------------
+    // ---------------------------- Skeleton Manipulation -------------------------------
+    // ----------------------------------------------------------------------------------
 
     public void TurnToLookDirection(double delta)
     {
@@ -71,6 +69,10 @@ public partial class CharacterAnimator
     {
         skeleton.RotateY(Mathf.AngleDifference(skeleton.Rotation.Y, moveAngle) * turnSpeed * (float)delta);
     }
+
+    // ----------------------------------------------------------------------------------
+    // ---------------------------- Locomotion Manipulation -----------------------------
+    // ----------------------------------------------------------------------------------
 
     public void UpdateVariableMoveDirections(double delta, float scale)
     {
@@ -84,72 +86,90 @@ public partial class CharacterAnimator
         locomotionBlendspace2DVector = locomotionBlendspace2DVector.Lerp(targetLocomotionBlendspace2DVector, (float)delta * locomotionBlendspace2DTransitionSpeed);
     }
 
-    public void AnimateLocoStanding(double delta, float scale)
-    {
-        UpdateVariableMoveDirections(delta, scale);
-        animationTree.Set("parameters/Locomotion/Loco_Standing/blend_position", locomotionBlendspace2DVector);
-    }
-
-    public void AnimateLocoCrouched(double delta, float scale)
-    {
-        UpdateVariableMoveDirections(delta, scale);
-        animationTree.Set("parameters/Locomotion/Loco_Crouched/blend_position", locomotionBlendspace2DVector);
-    }
-
     public Vector2 UpdateVariablesAirDirections(double delta)
     {
         return new Vector2(airSpeed, landingScale);
     }
 
-    public void AnimateLocoAir(double delta)
+    public void AnimateLocoStanding(double delta, float scale)
     {
-        Vector2 vec = UpdateVariablesAirDirections(delta);
-        animationTree.Set("parameters/Locomotion/Loco_Air/blend_position", vec);
+        UpdateVariableMoveDirections(delta, scale);
+        animationTree.Set(animationPaths[AnimationParameterPath.Loco_Standing_BlendPosition], locomotionBlendspace2DVector);
     }
 
-    // public float GetAnimationDuration(CharacterAnimation animName)
-    // {
-    //     string name = CharacterActionAnimations.AnimName[animName];
-    //     return animationPlayer.GetAnimation(name)?.Length ?? 0.0f;
-    // }
+    public void AnimateLocoCrouched(double delta, float scale)
+    {
+        UpdateVariableMoveDirections(delta, scale);
+        animationTree.Set(animationPaths[AnimationParameterPath.Loco_Crouched_BlendPosition], locomotionBlendspace2DVector);
+    }
 
-    // public void Play(CharacterAnimation anim)
-    // {
-    //     string name = CharacterActionAnimations.AnimName[anim];
-    //     animationPlayer.Play(name);
-    // }
+    public void AnimateLocoAir(double delta)
+    {
+        Vector2 airMovementBlendspace2DVector = UpdateVariablesAirDirections(delta);
+        animationTree.Set(animationPaths[AnimationParameterPath.Loco_Air_BlendPosition], airMovementBlendspace2DVector);
+    }
 
-    // public void Play(CharacterAnimation anim)
-    // {
-    //     string name = CharacterActionAnimations.AnimName[anim];
+    // ----------------------------------------------------------------------------------
+    // ----------------------------- Upperbody Manipulation -----------------------------
+    // ----------------------------------------------------------------------------------
 
-    //     // switch (layer)
-    //     // {
-    //     //     case ActionLayer.Legs:
-    //     //         animLocomotionStateMachine.Travel(name);
-    //     //         break;
+    public void SetUpperbodyAnimation(string anim)
+    {
+        animationTree.Set(animationPaths[AnimationParameterPath.Upperbody_Transition_Request], anim);
+    }
 
-    //     //     case ActionLayer.LeftArm:
-    //     //         animLeftArmStateMachine.Travel(name);
-    //     //         break;
+    public void SetUpperbodyBlendTarget(float blend)
+    {
+        locoBodyBlendTarget = blend;
+    }
 
-    //     //     case ActionLayer.RightArm:
-    //     //         animRightArmStateMachine.Travel(name);
-    //     //         break;
+    public void UpdateUpperbodyBlend(double delta)
+    {
+        locoBodyBlend = Mathf.Lerp(locoBodyBlend, locoBodyBlendTarget, (float)delta * locoBodyBlendTransitionSpeed);
+        animationTree.Set(animationPaths[AnimationParameterPath.Loco_Body_Blend], locoBodyBlend);
+    }
 
-    //     //     case ActionLayer.Torso:
-    //     //         animTorsoStateMachine.Travel(name);
-    //     //         break;
+    public float GetUpperbodyBlend()
+    {
+        return locoBodyBlend;
+    }
 
-    //     //     case ActionLayer.Head:
-    //     //         animHeadStateMachine.Travel(name);
-    //     //         break;
+    // ----------------------------------------------------------------------------------
+    // ----------------------------- Fullbody Manipulation ------------------------------
+    // ----------------------------------------------------------------------------------
 
-    //     //     case ActionLayer.FullBody:
-    //     //         animFullBodyStateMachine.Travel(name);
-    //     //         break;
+    public void SetFullbodyCurrentAnimation(CharacterAction action)
+    {
 
-    //     // }
-    // }
+    }
+
+    public void SetFullbodyNextAnimation(CharacterAction action)
+    {
+
+    }
+
+    public void SetFullbodyOverrideBlend(float blend)
+    {
+        animationTree.Set("parameters/FullbodyOverride/blend_amount", blend);
+    }
+
+    public void SetFullbodyAnimationBlend(float blend)
+    {
+        animationTree.Set("parameters/FullbodyAnimation/blend_amount", blend);
+    }
+}
+
+public enum AnimationParameterPath : byte
+{
+    Locomotion_Playback,
+    Loco_Standing_BlendPosition,
+    Loco_Crouched_BlendPosition,
+    Loco_Air_BlendPosition,
+
+    Loco_Body_Blend,
+
+    Upperbody_Transition_Request,
+    Upperbody_Transition_CurrentState,
+
 
 }

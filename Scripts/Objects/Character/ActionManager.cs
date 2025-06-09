@@ -40,11 +40,12 @@ public class ActionManager
         request.EnterState(character);
     }
 
-    public void Process(double delta)
+    public void Update(double delta)
     {
         CancelActions();
         RemoveActions();
         UpdateActions(delta);
+        Animate(delta);
         CheckRelevance();
     }
 

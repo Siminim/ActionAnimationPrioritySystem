@@ -5,13 +5,13 @@ public class JumpRequest : ActionRequest
     public JumpRequest()
     {
         actionName = CharacterAction.Jump;
-        actionLayer = ActionLayer.Legs;
+        actionLayer = CharacterActionLayer.Legs;
         priority = 5;
     }
 
     public override void EnterState(Character character)
     {
-        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Air.ToString());
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Air.ToString());
         character.animator.landingScale = -1.0f;
 
         character.Velocity -= character.GetGravity().Normalized() * character.jumpForce;

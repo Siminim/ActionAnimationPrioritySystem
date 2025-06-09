@@ -2,8 +2,10 @@ using System.Collections.Generic;
 
 public static class CharacterActionLibrary
 {
-    public static Dictionary<CharacterAction, ActionRequest> Actions = new Dictionary<CharacterAction, ActionRequest>
+    public static readonly Dictionary<CharacterAction, ActionRequest> Actions = new Dictionary<CharacterAction, ActionRequest>
     {
+        // Locomotion
+
         { CharacterAction.Idle, new IdleRequest() },
         { CharacterAction.Idle_Crouched, new IdleCrouchedRequest() },
         { CharacterAction.Walk, new WalkRequest() },
@@ -12,29 +14,16 @@ public static class CharacterActionLibrary
         { CharacterAction.Sprint, new SprintRequest() },
         { CharacterAction.Fall, new FallRequest() },
         { CharacterAction.Jump, new JumpRequest() },
-        { CharacterAction.Land, new LandRequest() }
+        { CharacterAction.Land, new LandRequest() },
+
+        // Upperbody
+
+        { CharacterAction.WeaponsReady, new WeaponsReadyRequest() },
+        { CharacterAction.WeaponsUnready, new WeaponsUnReadyRequest() },     
+        //{ CharacterAction.Blocking, new BlockingRequest() },
+
+        // Fullbody Override
+
+        //{ CharacterAction.Attack_Headbutt, new Attack_HeadbuttRequest() }
     };
-}
-
-public enum CharacterAnimation : byte
-{
-    Loco_Standing,
-    Loco_Crouched,
-    Loco_Air
-}
-
-public enum CharacterAction : byte
-{
-    // --------------- Locomotion ----------------
-    Idle,
-    Idle_Crouched,
-    Walk,
-    Walk_Crouched,
-    Run,
-    Sprint,
-    Fall,
-    Jump,
-    Land
-
-
 }

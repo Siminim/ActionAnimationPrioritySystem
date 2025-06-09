@@ -1,23 +1,23 @@
 using Godot;
 
-public class RunRequest : ActionRequest
+public class WalkCrouchedRequest : ActionRequest
 {
-    public RunRequest()
+    public WalkCrouchedRequest()
     {
-        actionName = CharacterAction.Run;
-        actionLayer = ActionLayer.Legs;
-        priority = 1;
+        actionName = CharacterAction.Walk_Crouched;
+        actionLayer = CharacterActionLayer.Legs;
+        priority = 2;
     }
 
     public override void EnterState(Character character)
     {
-        character.animator.animLocomotionStateMachine.Travel(CharacterAnimation.Loco_Standing.ToString());
+        character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Crouched.ToString());
     }
 
     public override void UpdateState(double delta, Character character)
     {
-        float moveSpeed = character.runSpeed;
-        float moveAcceleration = character.runAcceleration;
+        float moveSpeed = character.walkSpeed;
+        float moveAcceleration = character.walkAcceleration;
 
         Vector3 targetVelocity = (character.globalMoveVector * moveSpeed) - new Vector3(character.Velocity.X, 0, character.Velocity.Z);
         character.Velocity += targetVelocity * moveAcceleration * (float)delta;
@@ -26,12 +26,12 @@ public class RunRequest : ActionRequest
     public override void Animate(double delta, CharacterAnimator animator)
     {
         animator.TurnToMoveDirection(delta);
-        animator.AnimateLocoStanding(delta, 0.6f);
+        animator.AnimateLocoCrouched(delta, 0.3f);
     }
 
     public override void CheckRelevance(Character character)
     {
-        if (character.walkEnabled || character.globalMoveVector == Vector3.Zero)
+        if (character.globalMoveVector == Vector3.Zero || !character.crouchEnabled)
             EndAction(character);
     }
 }

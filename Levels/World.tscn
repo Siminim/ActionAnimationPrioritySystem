@@ -15,12 +15,30 @@ shadow_enabled = true
 directional_shadow_fade_start = 0.7
 directional_shadow_max_distance = 60.0
 
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="Lighting"]
+transform = Transform3D(-0.274715, -0.834827, 0.47707, -0.466506, 0.549572, 0.693067, -0.840776, -0.0321603, -0.540428, 0, 3, 0)
+light_energy = 0.15
+directional_shadow_fade_start = 0.7
+directional_shadow_max_distance = 60.0
+
 [node name="Objects" type="Node3D" parent="."]
 
 [node name="Ground" type="CSGBox3D" parent="Objects"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 use_collision = true
 size = Vector3(64, 0.5, 64)
+material = SubResource("StandardMaterial3D_2wqeq")
+
+[node name="Ground2" type="CSGBox3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 0.25, 0)
+use_collision = true
+size = Vector3(23, 1.5, 64)
+material = SubResource("StandardMaterial3D_2wqeq")
+
+[node name="Ground3" type="CSGBox3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 1, 16)
+use_collision = true
+size = Vector3(23, 3, 32)
 material = SubResource("StandardMaterial3D_2wqeq")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="Objects"]
