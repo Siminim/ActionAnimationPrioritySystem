@@ -18,17 +18,13 @@ public class JumpRequest : ActionRequest
 
         character.queuedJump = false;
         character.coyoteTimer = character.coyoteTimeLimit;
+
+        character.moving = true;
     }
 
     public override void UpdateState(double delta, Character character)
     {
 
-    }
-
-    public override void CancelState(Character character)
-    {
-        float velocityMod = character.Velocity.Y * 0.25f;
-        character.Velocity += character.GetGravity().Normalized() * velocityMod * character.jumpDecay;
     }
 
     public override void Animate(double delta, CharacterAnimator animator)
@@ -42,6 +38,17 @@ public class JumpRequest : ActionRequest
         animator.airSpeed = 1 - ((character.airSpeed - speed) / character.airSpeed);
 
         animator.AnimateLocoAir(delta);
+    }
+
+    public override void CancelState(Character character)
+    {
+        float velocityMod = character.Velocity.Y * 0.25f;
+        character.Velocity += character.GetGravity().Normalized() * velocityMod * character.jumpDecay;
+    }
+
+    public override void ExitState(Character character)
+    {
+        character.moving = false;
     }
 
     public override void CheckRelevance(Character character)

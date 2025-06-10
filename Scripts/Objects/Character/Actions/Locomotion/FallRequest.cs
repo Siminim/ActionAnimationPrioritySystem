@@ -13,6 +13,7 @@ public class FallRequest : ActionRequest
     {
         character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Air.ToString());
         character.animator.landingScale = 0.0f;
+        character.moving = true;
     }
 
     public override void UpdateState(double delta, Character character)
@@ -29,6 +30,11 @@ public class FallRequest : ActionRequest
         animator.airSpeed = 1 - ((character.airSpeed - speed) / character.airSpeed);
 
         animator.AnimateLocoAir(delta);
+    }
+
+    public override void ExitState(Character character)
+    {
+        character.moving = false;
     }
 
     public override void CheckRelevance(Character character)

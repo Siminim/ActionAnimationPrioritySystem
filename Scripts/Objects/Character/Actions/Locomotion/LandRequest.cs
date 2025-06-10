@@ -13,6 +13,7 @@ public class LandRequest : ActionRequest
     {
         character.animator.landingScale = 0.0f;
         character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Air.ToString());
+        character.moving = true;
     }
 
     public override void UpdateState(double delta, Character character)
@@ -31,6 +32,11 @@ public class LandRequest : ActionRequest
         animator.landingScale += (float)delta * 7.5f;
 
         animator.AnimateLocoAir(delta);
+    }
+
+    public override void ExitState(Character character)
+    {
+        character.moving = false;
     }
 
     public override void CheckRelevance(Character character)

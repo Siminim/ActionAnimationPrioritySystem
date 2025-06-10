@@ -19,11 +19,12 @@ public static class CharacterActionLibrary
         // Upperbody
 
         { CharacterAction.WeaponsReady, new WeaponsReadyRequest() },
-        { CharacterAction.WeaponsUnready, new WeaponsUnReadyRequest() },     
+        { CharacterAction.WeaponsUnready, new WeaponsUnReadyRequest() },
         //{ CharacterAction.Blocking, new BlockingRequest() },
 
         // Fullbody Override
 
-        //{ CharacterAction.Attack_Headbutt, new Attack_HeadbuttRequest() }
+        { CharacterAction.Flinch, new FlinchRequest() },
+        { CharacterAction.Attack, new AttackRequest() }
     };
 }

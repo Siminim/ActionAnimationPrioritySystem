@@ -12,6 +12,7 @@ public class WalkRequest : ActionRequest
     public override void EnterState(Character character)
     {
         character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Standing.ToString());
+        character.moving = true;
     }
 
     public override void UpdateState(double delta, Character character)
@@ -29,9 +30,14 @@ public class WalkRequest : ActionRequest
         animator.AnimateLocoStanding(delta, 0.3f);
     }
     
+    public override void ExitState(Character character)
+    {
+        character.moving = false;
+    }
+
     public override void CheckRelevance(Character character)
     {
-        if (character.globalMoveVector == Vector3.Zero)
+        if (character.globalMoveVector == Vector3.Zero || !character.walkEnabled)
             EndAction(character);
     }
 }

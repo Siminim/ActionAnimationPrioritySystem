@@ -12,6 +12,7 @@ public class WalkCrouchedRequest : ActionRequest
     public override void EnterState(Character character)
     {
         character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Crouched.ToString());
+        character.moving = true;
     }
 
     public override void UpdateState(double delta, Character character)
@@ -27,6 +28,11 @@ public class WalkCrouchedRequest : ActionRequest
     {
         animator.TurnToMoveDirection(delta);
         animator.AnimateLocoCrouched(delta, 0.3f);
+    }
+
+    public override void ExitState(Character character)
+    {
+        character.moving = false;
     }
 
     public override void CheckRelevance(Character character)

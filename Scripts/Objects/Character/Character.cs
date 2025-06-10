@@ -3,6 +3,7 @@ using System;
 
 public partial class Character : CharacterBody3D
 {
+    public Player player; 
     public CharacterAnimator animator { get; private set; }
     public ActionManager actionManager { get; private set; }
 
@@ -20,6 +21,7 @@ public partial class Character : CharacterBody3D
     #region Locomotion and Speed variables
 
     public Vector3 globalMoveVector { get; private set; } = Vector3.Zero;
+    public bool moving = false;
 
     public bool crouchEnabled = false;
     public bool walkEnabled = false;
@@ -34,6 +36,14 @@ public partial class Character : CharacterBody3D
 
     public float timeSinceQueuedJump = 0.0f;
     public float coyoteTimer = 0.0f;
+
+    #endregion
+
+    #region Combat variables
+
+    public ItemType heldItem = ItemType.None;
+    public bool queuedItemUse = false;
+    public short attackChain = 0;
 
     #endregion
 
@@ -68,11 +78,19 @@ public partial class Character : CharacterBody3D
 
     #endregion
 
+    #region Combat properties
+
+    public float itemUseQueueTimeCounter = 0.0f;
+    public float itemUseQueueTime = 0.5f;
+
+    #endregion
 
     public override void _EnterTree()
     {
         animator = new CharacterAnimator(this);
         actionManager = new ActionManager(this);
+
+        player = GetNode<Player>("PlayerController");
     }
 
     public override void _Ready()
@@ -87,12 +105,18 @@ public partial class Character : CharacterBody3D
 
     public override void _PhysicsProcess(double delta)
     {
+        player.PhysicsUpdate(delta);
+
         Jump(delta);
 
         if (weaponsReady)
             actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.WeaponsReady]);
 
+        //GD.Print("Use: " + queuedItemUse);
+        UpdateItemUseTimer(delta);
+
         actionManager.Update(delta);
+        animator.Update(delta);
 
         ApplyGravity(delta);
         ApplyFriction(delta);
@@ -116,9 +140,9 @@ public partial class Character : CharacterBody3D
 
     private void ApplyFriction(double delta)
     {
-        if (globalMoveVector != Vector3.Zero || (Velocity.X == 0 && Velocity.Z == 0))
+        if (moving || !IsOnFloor())
             return;
-
+        
         Vector3 normalFriction = new Vector3(Velocity.X, 0, Velocity.Z).Normalized();
 
         float frictionStrength = IsOnFloor() ? groundFrictionStrength : airFrictionStrength;
@@ -134,18 +158,18 @@ public partial class Character : CharacterBody3D
     // ------------------------- Use in Inherited Functions -----------------------------
     // ---------------------------------------------------------------------------------- 
 
-    protected void SetMoveVector(Vector3 moveVector)
+    public void SetMoveVector(Vector3 moveVector)
     {
         globalMoveVector = moveVector;
     }
 
-    protected void QueueJump()
+    public void QueueJump()
     {
         timeSinceQueuedJump = 0.0f;
         queuedJump = true;
     }
 
-    private void Jump(double delta)
+    public void Jump(double delta)
     {
         if (queuedJump && (IsOnFloor() || coyoteTimer < coyoteTimeLimit) && Velocity.Y <= 0.0f)
             actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Jump]);
@@ -156,14 +180,38 @@ public partial class Character : CharacterBody3D
             queuedJump = false;
     }
 
-    protected void EndJumpEarly()
+    public void EndJumpEarly()
     {
         actionManager.CancelAction(CharacterActionLibrary.Actions[CharacterAction.Jump]);
     }
 
-    // protected void SetBlockState(bool state)
-    // {
-    //     blockEnabled = state;
-    // }
+
+    // ----------------------------------------------------------------------------------
+    // ------------------------------- Item Use Timer -----------------------------------
+    // ----------------------------------------------------------------------------------
+
+    public void StartItemUseTimer()
+    {
+        itemUseQueueTimeCounter = itemUseQueueTime;
+        queuedItemUse = true;
+    }
+
+    private void UpdateItemUseTimer(double delta)
+    {
+        if (!queuedItemUse)
+            return;
+
+        actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Attack]);
+
+        itemUseQueueTimeCounter -= (float)delta;
+
+        if (itemUseQueueTimeCounter <= 0.0f)
+            EndItemUseTimer();
+    }
+
+    public void EndItemUseTimer()
+    {
+        queuedItemUse = false;
+    }
 
 }

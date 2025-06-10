@@ -6,6 +6,7 @@ public class ActionManager
     //private CharacterAnimator animator;
     private Character character;
     private List<ActionRequest> activeActions = new List<ActionRequest>();
+    private List<ActionRequest> actionsToAdd = new List<ActionRequest>();
     private List<ActionRequest> actionsToRemove = new List<ActionRequest>();
     private List<ActionRequest> cancelledActions = new List<ActionRequest>();
 
@@ -22,31 +23,41 @@ public class ActionManager
         {
             if ((activeActions[i].actionLayer & request.actionLayer) != 0)
             {
-                if (activeActions[i].priority > request.priority)
+                if (activeActions[i].priority >= request.priority)
                     return;
 
                 actionsToRemove.Add(activeActions[i]);
             }
         }
 
-        //request.timeRemaining = character.animator.GetAnimationDuration(request.animName);
-
         foreach (ActionRequest action in actionsToRemove)
         {
             EndAction(action);
         }
 
-        activeActions.Add(request);
-        request.EnterState(character);
+        actionsToAdd.Add(request);
     }
 
     public void Update(double delta)
     {
         CancelActions();
         RemoveActions();
+        AddActions();
+
         UpdateActions(delta);
         Animate(delta);
         CheckRelevance();
+    }
+
+    private void AddActions()
+    {
+        foreach (ActionRequest action in actionsToAdd)
+        {
+            activeActions.Add(action);
+            action.EnterState(character);
+        }
+
+        actionsToAdd.Clear();
     }
 
     private void CancelActions()
@@ -77,13 +88,13 @@ public class ActionManager
         {
             activeActions[i].UpdateState(delta, character);
 
-            if (activeActions[i].isOnTimer)
-            {
-                activeActions[i].timeRemaining -= (float)delta;
+            // if (activeActions[i].isOnTimer)
+            // {
+            //     activeActions[i].timeRemaining -= (float)delta;
 
-                if (activeActions[i].timeRemaining <= 0.0f)
-                    EndAction(activeActions[i]);
-            }
+            //     if (activeActions[i].timeRemaining <= 0.0f)
+            //         EndAction(activeActions[i]);
+            // }
         }
     }
 

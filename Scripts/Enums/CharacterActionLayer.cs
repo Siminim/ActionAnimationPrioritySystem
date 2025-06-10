@@ -6,6 +6,6 @@ public enum CharacterActionLayer
     LeftArm = 1 << 2,
     Head = 1 << 3,
 
-    FullbodyOverride = 1 << 4 | Legs | UpperBody | LeftArm | Head,
+    FullbodyOverride = Legs | UpperBody | LeftArm | Head,
 
 }

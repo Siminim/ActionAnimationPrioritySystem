@@ -13,6 +13,7 @@ public class SprintRequest : ActionRequest
     {
         character.crouchEnabled = false;
         character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Standing.ToString());
+        character.moving = true;
     }
 
     public override void UpdateState(double delta, Character character)
@@ -28,6 +29,11 @@ public class SprintRequest : ActionRequest
     {
         if (!character.sprintEnabled || character.globalMoveVector == Vector3.Zero)
             EndAction(character);
+    }
+
+    public override void ExitState(Character character)
+    {
+        character.moving = false;
     }
 
     public override void Animate(double delta, CharacterAnimator animator)

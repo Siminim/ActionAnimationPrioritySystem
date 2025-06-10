@@ -1,6 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://b5lnbyhljycvh"]
+[gd_scene load_steps=8 format=3 uid="uid://b5lnbyhljycvh"]
 
-[ext_resource type="PackedScene" uid="uid://ct821k33yjuwb" path="res://Objects/Character/Player/Player.tscn" id="1_u3tya"]
+[ext_resource type="PackedScene" uid="uid://ct821k33yjuwb" path="res://Objects/Character/Player/Character.tscn" id="1_u3tya"]
+[ext_resource type="PackedScene" uid="uid://cexwg4mn1n8m3" path="res://Objects/Character/Player/PlayerController.tscn" id="2_8ol0e"]
+[ext_resource type="PackedScene" uid="uid://d4d8ffr6o86r4" path="res://Objects/Character/Player/PlayerCamera.tscn" id="3_hmvop"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_u3tya"]
+sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+
+[sub_resource type="Sky" id="Sky_8ol0e"]
+sky_material = SubResource("ProceduralSkyMaterial_u3tya")
+
+[sub_resource type="Environment" id="Environment_hmvop"]
+background_mode = 2
+sky = SubResource("Sky_8ol0e")
+tonemap_mode = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2wqeq"]
 albedo_color = Color(0.43196, 0.481779, 0.307779, 1)
@@ -15,11 +29,8 @@ shadow_enabled = true
 directional_shadow_fade_start = 0.7
 directional_shadow_max_distance = 60.0
 
-[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="Lighting"]
-transform = Transform3D(-0.274715, -0.834827, 0.47707, -0.466506, 0.549572, 0.693067, -0.840776, -0.0321603, -0.540428, 0, 3, 0)
-light_energy = 0.15
-directional_shadow_fade_start = 0.7
-directional_shadow_max_distance = 60.0
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Lighting"]
+environment = SubResource("Environment_hmvop")
 
 [node name="Objects" type="Node3D" parent="."]
 
@@ -170,3 +181,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.25, -0.489469, -1.25)
 size = Vector3(0.5, 1, 0.5)
 
 [node name="Player" parent="." instance=ExtResource("1_u3tya")]
+
+[node name="PlayerController" parent="Player" instance=ExtResource("2_8ol0e")]
+
+[node name="PlayerCamera" parent="Player" instance=ExtResource("3_hmvop")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.5, 0)

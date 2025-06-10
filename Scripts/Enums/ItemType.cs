@@ -1,7 +1,6 @@
-public enum WeaponType
+public enum ItemType
 {
     None,
-    Fist,
     Dagger,
     LongSword,
     ShortSword,

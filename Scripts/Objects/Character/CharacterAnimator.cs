@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class CharacterAnimator
+public partial class CharacterAnimator : GodotObject
 {
     public Character character { get; private set; }
 
@@ -25,17 +25,23 @@ public partial class CharacterAnimator
 
     private float locoBodyBlend = 0.0f;
     private float locoBodyBlendTarget = 0.0f;
-    private float locoBodyBlendTransitionSpeed = 4.0f;
+    private readonly float locoBodyBlendTransitionSpeed = 4.0f;
+
+    private float fullBodyBlend = 0.0f;
+    private float fullBodyBlendTarget = 0.0f;
+    private readonly float fullBodyBlendTransitionSpeed = 4.0f;
 
     private static readonly Dictionary<AnimationParameterPath, StringName> animationPaths = new Dictionary<AnimationParameterPath, StringName>
     {
-        { AnimationParameterPath.Locomotion_Playback,               "parameters/Locomotion/playback"                                },
-        { AnimationParameterPath.Loco_Standing_BlendPosition,       "parameters/Locomotion/Loco_Standing/blend_position"            },
-        { AnimationParameterPath.Loco_Crouched_BlendPosition,       "parameters/Locomotion/Loco_Crouched/blend_position"            },
-        { AnimationParameterPath.Loco_Air_BlendPosition,            "parameters/Locomotion/Loco_Air/blend_position"                 },
-        { AnimationParameterPath.Loco_Body_Blend,                   "parameters/LocomotionBodyBlend/blend_amount"                   },
-        { AnimationParameterPath.Upperbody_Transition_Request,      "parameters/UpperbodyAnimations/Transition/transition_request"  },
-        { AnimationParameterPath.Upperbody_Transition_CurrentState, "parameters/UpperbodyAnimations/Transition/current_state"       },
+        { AnimationParameterPath.Locomotion_Playback,                   "parameters/Locomotion/playback"                                        },
+        { AnimationParameterPath.Loco_Standing_BlendPosition,           "parameters/Locomotion/Loco_Standing/blend_position"                    },
+        { AnimationParameterPath.Loco_Crouched_BlendPosition,           "parameters/Locomotion/Loco_Crouched/blend_position"                    },
+        { AnimationParameterPath.Loco_Air_BlendPosition,                "parameters/Locomotion/Loco_Air/blend_position"                         },
+        { AnimationParameterPath.Loco_Body_Blend,                       "parameters/LocomotionBodyBlend/blend_amount"                           },
+        { AnimationParameterPath.Upperbody_Transition_Request,          "parameters/UpperbodyAnimations/Transition/transition_request"          },
+        { AnimationParameterPath.FullbodyOverride_Transition_Request,   "parameters/FullbodyAnimation/FullbodyTransitions/transition_request"   },
+        { AnimationParameterPath.FullbodyOverride_Transition_Current,   "parameters/FullbodyAnimation/FullbodyTransitions/current_state" },
+        { AnimationParameterPath.FullbodyOverride_Blend,                "parameters/FullbodyOverrideBlend/blend_amount"         }
     };
 
 
@@ -49,6 +55,13 @@ public partial class CharacterAnimator
 
         animLocomotionStateMachine = (AnimationNodeStateMachinePlayback)animationTree.Get(animationPaths[AnimationParameterPath.Locomotion_Playback]);
     }
+
+    public void Update(double delta)
+    {
+        UpdateFullbodyOverrideBlend(delta);
+    }
+
+
 
     public void UpdateLookingAngle(Vector2 direction)
     {
@@ -138,24 +151,20 @@ public partial class CharacterAnimator
     // ----------------------------- Fullbody Manipulation ------------------------------
     // ----------------------------------------------------------------------------------
 
-    public void SetFullbodyCurrentAnimation(CharacterAction action)
+    public void SetFullbodyOverrideAnimation(string anim)
     {
-
+        animationTree.Set(animationPaths[AnimationParameterPath.FullbodyOverride_Transition_Request], anim);
     }
 
-    public void SetFullbodyNextAnimation(CharacterAction action)
+    public void SetFullbodyOverrideBlendTarget(float blend)
     {
-
+        fullBodyBlendTarget = blend;
     }
 
-    public void SetFullbodyOverrideBlend(float blend)
+    private void UpdateFullbodyOverrideBlend(double delta)
     {
-        animationTree.Set("parameters/FullbodyOverride/blend_amount", blend);
-    }
-
-    public void SetFullbodyAnimationBlend(float blend)
-    {
-        animationTree.Set("parameters/FullbodyAnimation/blend_amount", blend);
+        fullBodyBlend = Mathf.Lerp(fullBodyBlend, fullBodyBlendTarget, (float)delta * fullBodyBlendTransitionSpeed);
+        animationTree.Set(animationPaths[AnimationParameterPath.FullbodyOverride_Blend], fullBodyBlend);
     }
 }
 
@@ -169,7 +178,10 @@ public enum AnimationParameterPath : byte
     Loco_Body_Blend,
 
     Upperbody_Transition_Request,
-    Upperbody_Transition_CurrentState,
+
+    FullbodyOverride_Transition_Request,
+    FullbodyOverride_Transition_Current,
+    FullbodyOverride_Blend
 
 
 }

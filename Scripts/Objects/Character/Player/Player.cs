@@ -1,31 +1,24 @@
 using Godot;
 using System;
 
-public partial class Player : Character
+public partial class Player : Node
 {
+    private Character character;
     private PlayerCamera playerCamera;
 
     protected Vector3 localMoveVector = Vector3.Zero;
 
     public override void _EnterTree()
     {
-        base._EnterTree();
-        playerCamera = GetNode<PlayerCamera>("PlayerCamera");
+        character = GetParent<Character>();
+        playerCamera = character.GetNode<PlayerCamera>("PlayerCamera");
     }
 
-    public override void _Ready()
-    {
-        base._Ready();
-    }
-
-    public override void _Process(double delta)
-    {
-
-    }
-
-    public override void _PhysicsProcess(double delta)
+    public void PhysicsUpdate(double delta)
     {
         //BlockInput();
+
+        UseHeldItem();
 
         ReadyWeaponInput();
         JumpInput();
@@ -35,7 +28,6 @@ public partial class Player : Character
 
         MovementInput();
 
-        base._PhysicsProcess(delta);
     }
 
     public override void _Input(InputEvent @event)
@@ -49,7 +41,7 @@ public partial class Player : Character
             return;
 
         playerCamera.RotateArm(-mouseMotion.Relative.X, -mouseMotion.Relative.Y);
-        animator.UpdateLookingAngle(playerCamera.GetLookDirection());
+        character.animator.UpdateLookingAngle(playerCamera.GetLookDirection());
     }
 
     public void MovementInput()
@@ -57,72 +49,76 @@ public partial class Player : Character
         Vector2 inputDir = Input.GetVector("MoveLeft", "MoveRight", "MoveForward", "MoveBackward");
 
         localMoveVector = new Vector3(inputDir.X, 0, inputDir.Y);
-        SetMoveVector((playerCamera.Basis * localMoveVector).Normalized());
+        character.SetMoveVector((playerCamera.Basis * localMoveVector).Normalized());
 
-        if (!IsOnFloor())
+        if (!character.IsOnFloor())
         {
-            actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Fall]);
+            character.actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Fall]);
         }
         else if (inputDir != Vector2.Zero)
         {
-            if (sprintEnabled) // if sprinting
-                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Sprint]);
+            if (character.sprintEnabled) // if sprinting
+                character.actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Sprint]);
 
-            if (crouchEnabled)
-                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Walk_Crouched]);
+            if (character.crouchEnabled)
+                character.actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Walk_Crouched]);
 
-            if (!walkEnabled) // if running
-                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Run]);
+            if (!character.walkEnabled) // if running
+                character.actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Run]);
             else
-                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Walk]);
+                character.actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Walk]);
 
         }
         else // if not moving
         {
-            if (crouchEnabled)
-                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Idle_Crouched]);
+            if (character.crouchEnabled)
+                character.actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Idle_Crouched]);
             else
-                actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Idle]);
+                character.actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.Idle]);
         }
     }
 
     public void WalkInput()
     {
         if (Input.IsActionJustPressed("SwapWalkMode"))
-            walkEnabled = !walkEnabled;
+            character.walkEnabled = !character.walkEnabled;
     }
     public void SprintInput()
     {
-        sprintEnabled = Input.IsActionPressed("Sprint");
+        character.sprintEnabled = Input.IsActionPressed("Sprint");
     }
 
     public void CrouchInput()
     {
         if (Input.IsActionJustPressed("Crouch"))
-            crouchEnabled = !crouchEnabled;
+            character.crouchEnabled = !character.crouchEnabled;
     }
 
     public void JumpInput()
     {
         if (Input.IsActionJustPressed("Jump"))
-            QueueJump();
+            character.QueueJump();
 
         if (Input.IsActionJustReleased("Jump"))
-            EndJumpEarly();
+            character.EndJumpEarly();
     }
 
     public void ReadyWeaponInput()
     {
         if (Input.IsActionJustPressed("ReadyWeapon"))
-            weaponsReady = !weaponsReady;
+            character.weaponsReady = !character.weaponsReady;
     }
 
     public void UseHeldItem()
     {
         if (Input.IsActionJustPressed("UseHeldItem"))
-        {
-            
-        }
+            character.StartItemUseTimer();
+    }
+
+    //DEBUG: This should be in the Character class but it's easier to test here
+    public void HeldItemAnimationFinished(string anim)
+    {
+        GD.Print("HeldItemAnimationFinished: " + anim);
     }
 
     // public void BlockInput()

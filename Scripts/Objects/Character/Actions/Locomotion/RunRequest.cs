@@ -12,6 +12,7 @@ public class RunRequest : ActionRequest
     public override void EnterState(Character character)
     {
         character.animator.animLocomotionStateMachine.Travel(CharacterAnimStateMachineName.Loco_Standing.ToString());
+        character.moving = true;
     }
 
     public override void UpdateState(double delta, Character character)
@@ -27,6 +28,11 @@ public class RunRequest : ActionRequest
     {
         animator.TurnToMoveDirection(delta);
         animator.AnimateLocoStanding(delta, 0.6f);
+    }
+
+    public override void ExitState(Character character)
+    {
+        character.moving = false;
     }
 
     public override void CheckRelevance(Character character)

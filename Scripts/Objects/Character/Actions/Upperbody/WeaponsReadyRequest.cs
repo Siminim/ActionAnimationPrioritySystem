@@ -14,7 +14,9 @@ public class WeaponsReadyRequest : ActionRequest
     {
         //TODO: Determine which upperbody weapons ready to use based on held weapon
 
-        character.animator.SetUpperbodyAnimation("Arms_Up");
+        if (character.heldItem == ItemType.None)
+            character.animator.SetUpperbodyAnimation("Arms_Up");
+
         character.animator.SetUpperbodyBlendTarget(0.85f);
     }
 
