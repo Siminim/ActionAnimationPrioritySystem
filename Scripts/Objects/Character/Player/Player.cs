@@ -112,13 +112,12 @@ public partial class Player : Node
     public void UseHeldItem()
     {
         if (Input.IsActionJustPressed("UseHeldItem"))
-            character.StartItemUseTimer();
-    }
-
-    //DEBUG: This should be in the Character class but it's easier to test here
-    public void HeldItemAnimationFinished(string anim)
-    {
-        GD.Print("HeldItemAnimationFinished: " + anim);
+        {
+            if (!character.weaponsReady)
+                character.weaponsReady = true;
+            else
+                character.StartItemUseTimer();
+        }
     }
 
     // public void BlockInput()

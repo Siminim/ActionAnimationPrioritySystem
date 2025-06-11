@@ -44,6 +44,11 @@ public class ActionManager
         RemoveActions();
         AddActions();
 
+        GD.Print("==========================");
+        GD.Print($"Actions: {activeActions.Count}");
+        foreach(ActionRequest action in activeActions)
+            GD.Print(action);
+
         UpdateActions(delta);
         Animate(delta);
         CheckRelevance();
@@ -87,14 +92,6 @@ public class ActionManager
         for (int i = 0; i < activeActions.Count; i++)
         {
             activeActions[i].UpdateState(delta, character);
-
-            // if (activeActions[i].isOnTimer)
-            // {
-            //     activeActions[i].timeRemaining -= (float)delta;
-
-            //     if (activeActions[i].timeRemaining <= 0.0f)
-            //         EndAction(activeActions[i]);
-            // }
         }
     }
 

@@ -58,10 +58,9 @@ public partial class CharacterAnimator : GodotObject
 
     public void Update(double delta)
     {
+        UpdateUpperbodyBlend(delta);
         UpdateFullbodyOverrideBlend(delta);
     }
-
-
 
     public void UpdateLookingAngle(Vector2 direction)
     {

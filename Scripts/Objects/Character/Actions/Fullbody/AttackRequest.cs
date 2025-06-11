@@ -26,18 +26,22 @@ public class AttackRequest : ActionRequest
             }
         }
 
+        character.attacking = true;
         character.EndItemUseTimer();
         character.attackChain++;
     }
 
     public override void ExitState(Character character)
     {
+        character.animator.SetFullbodyOverrideBlendTarget(0.0f);
+
         if (!character.queuedItemUse)
             character.attackChain = 0;
     }
 
     public override void CheckRelevance(Character character)
     {
-        
+        if (!character.attacking)
+            EndAction(character);
     }
 }

@@ -3,7 +3,7 @@ using System;
 
 public partial class Character : CharacterBody3D
 {
-    public Player player; 
+    public Player player;
     public CharacterAnimator animator { get; private set; }
     public ActionManager actionManager { get; private set; }
 
@@ -44,6 +44,7 @@ public partial class Character : CharacterBody3D
     public ItemType heldItem = ItemType.None;
     public bool queuedItemUse = false;
     public short attackChain = 0;
+    public bool attacking = false;
 
     #endregion
 
@@ -81,7 +82,7 @@ public partial class Character : CharacterBody3D
     #region Combat properties
 
     public float itemUseQueueTimeCounter = 0.0f;
-    public float itemUseQueueTime = 0.5f;
+    public float itemUseQueueTime = 1.5f;
 
     #endregion
 
@@ -111,8 +112,8 @@ public partial class Character : CharacterBody3D
 
         if (weaponsReady)
             actionManager.RequestAction(CharacterActionLibrary.Actions[CharacterAction.WeaponsReady]);
-
-        //GD.Print("Use: " + queuedItemUse);
+            
+        
         UpdateItemUseTimer(delta);
 
         actionManager.Update(delta);
@@ -142,7 +143,7 @@ public partial class Character : CharacterBody3D
     {
         if (moving || !IsOnFloor())
             return;
-        
+
         Vector3 normalFriction = new Vector3(Velocity.X, 0, Velocity.Z).Normalized();
 
         float frictionStrength = IsOnFloor() ? groundFrictionStrength : airFrictionStrength;
@@ -214,4 +215,9 @@ public partial class Character : CharacterBody3D
         queuedItemUse = false;
     }
 
+    public void ActionAnimationFinished(string animation)
+    {
+        if (animation == "Attack")
+            attacking = false;
+    }
 }
